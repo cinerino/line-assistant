@@ -8,7 +8,7 @@ import * as createDebug from 'debug';
 import * as http from 'http';
 import * as app from './app/app';
 
-const debug = createDebug('sskts-line-assistant:server');
+const debug = createDebug('cinerino-line-assistant:server');
 
 /**
  * Get port from environment and store in Express.

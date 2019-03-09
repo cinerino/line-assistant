@@ -23,7 +23,7 @@ var MessageType;
 })(MessageType = exports.MessageType || (exports.MessageType = {}));
 const createDebug = require("debug");
 const request = require("request-promise-native");
-const debug = createDebug('sskts-line-assistant:controller:line');
+const debug = createDebug('cinerino-line-assistant:controller:line');
 exports.URL_PUSH_MESSAGE = 'https://api.line.me/v2/bot/message/push';
 /**
  * メッセージ送信

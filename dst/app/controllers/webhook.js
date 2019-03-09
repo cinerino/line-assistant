@@ -19,7 +19,7 @@ const LINE = require("../../line");
 const MessageController = require("./webhook/message");
 const ImageMessageController = require("./webhook/message/image");
 const PostbackController = require("./webhook/postback");
-const debug = createDebug('sskts-line-assistant:controller:webhook');
+const debug = createDebug('cinerino-line-assistant:controller');
 /**
  * メッセージが送信されたことを示すEvent Objectです。
  */

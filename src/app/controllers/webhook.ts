@@ -13,7 +13,7 @@ import * as MessageController from './webhook/message';
 import * as ImageMessageController from './webhook/message/image';
 import * as PostbackController from './webhook/postback';
 
-const debug = createDebug('sskts-line-assistant:controller:webhook');
+const debug = createDebug('cinerino-line-assistant:controller');
 
 /**
  * メッセージが送信されたことを示すEvent Objectです。

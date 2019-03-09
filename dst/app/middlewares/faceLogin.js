@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * 顔ログインミドルウェア
  */
-const ssktsapi = require("@motionpicture/sskts-api-nodejs-client");
+const cinerinoapi = require("@cinerino/api-nodejs-client");
 const http_status_1 = require("http-status");
 const querystring = require("querystring");
 const request = require("request-promise-native");
@@ -122,6 +122,6 @@ exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* 
         next();
     }
     catch (error) {
-        next(new ssktsapi.factory.errors.Unauthorized(error.message));
+        next(new cinerinoapi.factory.errors.Unauthorized(error.message));
     }
 });

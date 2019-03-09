@@ -11,12 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * LINE webhook messageコントローラー
  */
-const sskts = require("@motionpicture/sskts-domain");
 const createDebug = require("debug");
 const moment = require("moment");
 const request = require("request-promise-native");
 const LINE = require("../../../line");
-const debug = createDebug('sskts-line-assistant:controller:webhook:message');
+const debug = createDebug('cinerino-line-assistant:controller');
 /**
  * 使い方を送信する
  */
@@ -171,23 +170,9 @@ exports.askFromWhenAndToWhen = askFromWhenAndToWhen;
 /**
  * 取引CSVダウンロードURIを発行する
  */
-function publishURI4transactionsCSV(userId, dateFrom, dateThrough) {
+function publishURI4transactionsCSV(userId, _, __) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(userId, `${dateFrom}-${dateThrough}の取引を検索しています...`);
-        const startFrom = moment(`${dateFrom}T00:00:00+09:00`, 'YYYYMMDDThh:mm:ssZ');
-        const startThrough = moment(`${dateThrough}T00:00:00+09:00`, 'YYYYMMDDThh:mm:ssZ').add(1, 'day');
-        const csv = yield sskts.service.report.transaction.download({
-            startFrom: startFrom.toDate(),
-            startThrough: startThrough.toDate()
-        }, 'csv')({
-            transaction: new sskts.repository.Transaction(sskts.mongoose.connection)
-        });
-        yield LINE.pushMessage(userId, 'csvを作成しています...');
-        const sasUrl = yield sskts.service.util.uploadFile({
-            fileName: `sskts-line-assistant-transactions-${moment().format('YYYYMMDDHHmmss')}.csv`,
-            text: csv
-        })();
-        yield LINE.pushMessage(userId, `download -> ${sasUrl} `);
+        yield LINE.pushMessage(userId, 'Cinerino Consoleをご利用ください');
     });
 }
 exports.publishURI4transactionsCSV = publishURI4transactionsCSV;

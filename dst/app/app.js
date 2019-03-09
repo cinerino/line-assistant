@@ -2,14 +2,10 @@
 /**
  * Expressアプリケーション
  */
-const sskts = require("@motionpicture/sskts-domain");
 const bodyParser = require("body-parser");
-const createDebug = require("debug");
 const express = require("express");
 const errorHandler_1 = require("./middlewares/errorHandler");
 const notFoundHandler_1 = require("./middlewares/notFoundHandler");
-const mongooseConnectionOptions_1 = require("../mongooseConnectionOptions");
-const debug = createDebug('sskts-line-assistant:*');
 const app = express();
 // view engine setup
 // app.set('views', `${__dirname}/views`);
@@ -20,9 +16,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // 静的ファイル
 // app.use(express.static(__dirname + '/../public'));
-// MongoDB接続
-// tslint:disable-next-line:no-console
-sskts.mongoose.connect(process.env.MONGOLAB_URI, mongooseConnectionOptions_1.default).then(debug).catch(console.error);
 // routers
 const router_1 = require("./routes/router");
 const webhook_1 = require("./routes/webhook");
