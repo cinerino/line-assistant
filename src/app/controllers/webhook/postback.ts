@@ -95,7 +95,7 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
                             altText: 'aaa',
                             template: {
                                 type: 'buttons',
-                                text: (i === 0) ? '販売者を選択してください' : undefined,
+                                text: '販売者を選択してください',
                                 actions: sellerChoices.map((seller) => {
                                     if (seller.location === undefined) {
                                         throw new Error('Seller location undefined');
