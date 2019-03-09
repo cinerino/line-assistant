@@ -67,10 +67,12 @@ export async function pushHowToUse(userId: string) {
 export async function askTransactionInquiryKey(user: User) {
     // tslint:disable-next-line:no-multiline-string
     await LINE.pushMessage(user.userId, `次のいずれかを入力してください。
-1. [劇場コード]-[予約番号]
-例:118-2425
+1. 確認番号
+例:2425
 
-2. 取引ID
+2. 電話番号
+
+3. 取引ID
 例:5a7b2ed6c993250364388acd`);
 }
 
@@ -81,13 +83,11 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
     debug(userId, message);
     const datas = message.split('-');
 
-    let theater: string = '';
-    let reserveNumOrTel: string = '';
+    let searchingText: string = '';
     if (datas.length > 1) {
-        theater = datas[0];
-        reserveNumOrTel = datas[1];
+        searchingText = datas[1];
     } else {
-        reserveNumOrTel = datas[0];
+        searchingText = datas[0];
     }
 
     // キュー実行のボタン表示
@@ -114,12 +114,12 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                             {
                                 type: 'postback',
                                 label: '確認番号',
-                                data: `action=searchTransactionByReserveNum&theater=${theater}&reserveNum=${reserveNumOrTel}`
+                                data: `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
                             },
                             {
                                 type: 'postback',
                                 label: '電話番号',
-                                data: `action=searchTransactionByTel&theater=${theater}&tel=${reserveNumOrTel}`
+                                data: `action=searchTransactionByConditions&telephone=${searchingText}`
                             }
                         ]
                     }
@@ -133,7 +133,7 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
  * 日付選択を求める
  */
 export async function askFromWhenAndToWhen(userId: string) {
-    await LINE.pushMessage(userId, `Cinerino Consoleをご利用ください。 ${process.env.CINERINO_CONSOLE_ENDPOINT}`);
+    await LINE.pushMessage(userId, `Cinerino Consoleをご利用ください。注文取引検索にてcsvダウンロードを実行できます。 ${process.env.CINERINO_CONSOLE_ENDPOINT}`);
     // await request.post(
     //     'https://api.line.me/v2/bot/message/push',
     //     {

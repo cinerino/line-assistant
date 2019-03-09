@@ -44,7 +44,7 @@ function message(event, user) {
                             break;
                         // [劇場コード]-[予約番号 or 電話番号] or 取引IDで検索
                         case /^\d{3}-\d{1,12}|\w{24}$/.test(messageText):
-                            yield MessageController.pushButtonsReserveNumOrTel(userId, messageText);
+                            yield MessageController.askTransactionInquiryKey(user);
                             break;
                         // 取引csv要求
                         case /^csv$/.test(messageText):
@@ -98,14 +98,18 @@ function postback(event, user) {
         const userId = event.source.userId;
         try {
             switch (data.action) {
-                case 'searchTransactionByReserveNum':
-                    yield PostbackController.searchTransactionByReserveNum(user, data.reserveNum, data.theater, data.seller);
+                case 'searchTransactionByConditions':
+                    yield PostbackController.searchTransactionByConditions({
+                        user: user,
+                        conditions: {
+                            telephone: data.telephone,
+                            confirmationNumber: data.confirmationNumber,
+                            sellerId: data.seller
+                        }
+                    });
                     break;
                 case 'searchTransactionById':
                     yield PostbackController.searchTransactionById(user, data.transaction);
-                    break;
-                case 'searchTransactionByTel':
-                    yield PostbackController.searchTransactionByTel(userId, data.tel, data.theater);
                     break;
                 case 'startReturnOrder':
                     yield PostbackController.startReturnOrder(user, data.orderNumber);

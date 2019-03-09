@@ -61,71 +61,82 @@ function searchTransactionById(user, transactionId) {
     });
 }
 exports.searchTransactionById = searchTransactionById;
+function selectSeller(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const sellerService = new cinerinoapi.service.Seller({
+            endpoint: API_ENDPOINT,
+            auth: params.user.authClient
+        });
+        const searchSellersResult = yield sellerService.search({});
+        const sellers = searchSellersResult.data.filter((seller) => seller.location !== undefined);
+        const LIMIT = 4;
+        const pushCount = (sellers.length % LIMIT) + 1;
+        for (const [i] of [...Array(pushCount)].entries()) {
+            const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
+            yield request.post({
+                simple: false,
+                url: 'https://api.line.me/v2/bot/message/push',
+                auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+                json: true,
+                body: {
+                    to: params.user.userId,
+                    messages: [
+                        {
+                            type: 'template',
+                            altText: 'aaa',
+                            template: {
+                                type: 'buttons',
+                                text: '販売者を選択してください',
+                                actions: sellerChoices.map((seller) => {
+                                    return {
+                                        type: 'postback',
+                                        label: seller.name.ja,
+                                        data: querystring.stringify(Object.assign({}, params.conditions, { action: 'searchTransactionByConditions', seller: seller.id }))
+                                    };
+                                })
+                            }
+                        }
+                    ]
+                }
+            }).promise();
+        }
+    });
+}
+exports.selectSeller = selectSeller;
 /**
  * 予約番号で取引を検索する
  */
-function searchTransactionByReserveNum(user, reserveNum, _, sellerId) {
+function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        debug(user.userId, reserveNum);
-        // 劇場指定がなければ、販売者を確認する
-        if (sellerId === '' || sellerId === undefined) {
-            const sellerService = new cinerinoapi.service.Seller({
-                endpoint: API_ENDPOINT,
-                auth: user.authClient
-            });
-            const searchSellersResult = yield sellerService.search({});
-            const sellers = searchSellersResult.data.filter((seller) => seller.location !== undefined);
-            const LIMIT = 4;
-            const pushCount = (sellers.length % LIMIT) + 1;
-            for (const [i] of [...Array(pushCount)].entries()) {
-                const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
-                yield request.post({
-                    simple: false,
-                    url: 'https://api.line.me/v2/bot/message/push',
-                    auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
-                    json: true,
-                    body: {
-                        to: user.userId,
-                        messages: [
-                            {
-                                type: 'template',
-                                altText: 'aaa',
-                                template: {
-                                    type: 'buttons',
-                                    text: '販売者を選択してください',
-                                    actions: sellerChoices.map((seller) => {
-                                        if (seller.location === undefined) {
-                                            throw new Error('Seller location undefined');
-                                        }
-                                        const branchCode = seller.location.branchCode;
-                                        return {
-                                            type: 'postback',
-                                            label: seller.name.ja,
-                                            data: querystring.stringify({
-                                                action: 'searchTransactionByReserveNum',
-                                                seller: seller.id,
-                                                theater: branchCode,
-                                                reserveNum: reserveNum
-                                            })
-                                        };
-                                    })
-                                }
-                            }
-                        ]
-                    }
-                }).promise();
-            }
+        if (params.conditions.confirmationNumber !== undefined
+            && params.conditions.telephone !== undefined) {
+            yield LINE.pushMessage(params.user.userId, '検索条件が足りません');
             return;
         }
-        yield LINE.pushMessage(user.userId, '予約番号で検索しています...');
+        // 劇場指定がなければ、販売者を確認する
+        if (params.conditions.sellerId === '' || params.conditions.sellerId === undefined) {
+            yield selectSeller({
+                user: params.user,
+                conditions: params.conditions
+            });
+            return;
+        }
+        yield LINE.pushMessage(params.user.userId, '取引を検索しています...');
         // 注文検索
         const orderService = new cinerinoapi.service.Order({
             endpoint: API_ENDPOINT,
-            auth: user.authClient
+            auth: params.user.authClient
         });
         const searchOrdersResult = yield orderService.search({
-            confirmationNumbers: [reserveNum.toString()],
-            seller: { ids: [sellerId] }
+            confirmationNumbers: (params.conditions.confirmationNumber !== undefined)
+                ? [params.conditions.confirmationNumber.toString()]
+                : undefined,
+            seller: { ids: [params.conditions.sellerId] },
+            customer: {
+                telephone: (params.conditions.telephone !== undefined)
+                    ? params.conditions.telephone
+                    : undefined
+            }
             // acceptedOffers: {
             //     itemOffered: {
             //         reservationFor: {
@@ -140,23 +151,13 @@ function searchTransactionByReserveNum(user, reserveNum, _, sellerId) {
         });
         const order = searchOrdersResult.data.shift();
         if (order === undefined) {
-            yield LINE.pushMessage(user.userId, MESSAGE_TRANSACTION_NOT_FOUND);
+            yield LINE.pushMessage(params.user.userId, MESSAGE_TRANSACTION_NOT_FOUND);
             return;
         }
-        yield pushTransactionDetails(user, order.orderNumber);
+        yield pushTransactionDetails(params.user, order.orderNumber);
     });
 }
-exports.searchTransactionByReserveNum = searchTransactionByReserveNum;
-/**
- * 電話番号で取引を検索する
- */
-function searchTransactionByTel(userId, tel, __) {
-    return __awaiter(this, void 0, void 0, function* () {
-        debug('tel:', tel);
-        yield LINE.pushMessage(userId, 'implementing...');
-    });
-}
-exports.searchTransactionByTel = searchTransactionByTel;
+exports.searchTransactionByConditions = searchTransactionByConditions;
 /**
  * 取引IDから取引情報詳細を送信する
  */
