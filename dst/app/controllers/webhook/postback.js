@@ -91,7 +91,13 @@ function selectSeller(params) {
                                     return {
                                         type: 'postback',
                                         label: seller.name.ja,
-                                        data: querystring.stringify(Object.assign({}, params.conditions, { action: 'searchTransactionByConditions', seller: seller.id }))
+                                        data: querystring.stringify({
+                                            // ...params.conditions,
+                                            action: 'searchTransactionByConditions',
+                                            seller: seller.id,
+                                            confirmationNumber: params.conditions.confirmationNumber,
+                                            telephone: params.conditions.telephone
+                                        })
                                     };
                                 })
                             }
@@ -104,7 +110,7 @@ function selectSeller(params) {
 }
 exports.selectSeller = selectSeller;
 /**
- * 予約番号で取引を検索する
+ * 注文取引を検索する
  */
 function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -115,10 +121,7 @@ function searchTransactionByConditions(params) {
         }
         // 劇場指定がなければ、販売者を確認する
         if (params.conditions.sellerId === '' || params.conditions.sellerId === undefined) {
-            yield selectSeller({
-                user: params.user,
-                conditions: params.conditions
-            });
+            yield selectSeller(params);
             return;
         }
         yield LINE.pushMessage(params.user.userId, '取引を検索しています...');

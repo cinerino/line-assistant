@@ -62,12 +62,14 @@ export async function searchTransactionById(user: User, transactionId: string) {
     }
 }
 
+export interface ISearchPlaceOrderTransactionsConditions {
+    confirmationNumber?: string;
+    telephone?: string;
+}
+
 export async function selectSeller(params: {
     user: User;
-    conditions: {
-        confirmationNumber?: string;
-        telephone?: string;
-    };
+    conditions: ISearchPlaceOrderTransactionsConditions;
 }) {
     const sellerService = new cinerinoapi.service.Seller({
         endpoint: API_ENDPOINT,
@@ -100,9 +102,11 @@ export async function selectSeller(params: {
                                     type: 'postback',
                                     label: seller.name.ja,
                                     data: querystring.stringify({
-                                        ...params.conditions,
+                                        // ...params.conditions,
                                         action: 'searchTransactionByConditions',
-                                        seller: seller.id
+                                        seller: seller.id,
+                                        confirmationNumber: params.conditions.confirmationNumber,
+                                        telephone: params.conditions.telephone
                                     })
                                 };
                             })
@@ -113,14 +117,13 @@ export async function selectSeller(params: {
         }).promise();
     }
 }
+
 /**
- * 予約番号で取引を検索する
+ * 注文取引を検索する
  */
 export async function searchTransactionByConditions(params: {
     user: User;
-    conditions: {
-        confirmationNumber?: string;
-        telephone?: string;
+    conditions: ISearchPlaceOrderTransactionsConditions & {
         sellerId: string;
     };
 }) {
@@ -133,10 +136,7 @@ export async function searchTransactionByConditions(params: {
 
     // 劇場指定がなければ、販売者を確認する
     if (params.conditions.sellerId === '' || params.conditions.sellerId === undefined) {
-        await selectSeller({
-            user: params.user,
-            conditions: params.conditions
-        });
+        await selectSeller(params);
 
         return;
     }
