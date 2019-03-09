@@ -38,6 +38,10 @@ function message(event, user) {
                         case /^取引照会$/.test(messageText):
                             yield MessageController.askTransactionInquiryKey(user);
                             break;
+                        // 予約番号 or 電話番号 or 取引IDで検索
+                        case /^\d{1,12}|\w{24}$/.test(messageText):
+                            yield MessageController.pushButtonsReserveNumOrTel(userId, messageText);
+                            break;
                         // [劇場コード]-[予約番号 or 電話番号] or 取引IDで検索
                         case /^\d{3}-\d{1,12}|\w{24}$/.test(messageText):
                             yield MessageController.pushButtonsReserveNumOrTel(userId, messageText);
@@ -45,11 +49,6 @@ function message(event, user) {
                         // 取引csv要求
                         case /^csv$/.test(messageText):
                             yield MessageController.askFromWhenAndToWhen(userId);
-                            break;
-                        // 取引csv期間指定
-                        case /^\d{8}-\d{8}$/.test(messageText):
-                            // tslint:disable-next-line:no-magic-numbers
-                            yield MessageController.publishURI4transactionsCSV(userId, messageText.substr(0, 8), messageText.substr(9, 8));
                             break;
                         // ログアウト
                         case /^logout$/.test(messageText):
@@ -107,9 +106,6 @@ function postback(event, user) {
                     break;
                 case 'searchTransactionByTel':
                     yield PostbackController.searchTransactionByTel(userId, data.tel, data.theater);
-                    break;
-                case 'searchTransactionsByDate':
-                    yield PostbackController.searchTransactionsByDate(userId, event.postback.params.date);
                     break;
                 case 'startReturnOrder':
                     yield PostbackController.startReturnOrder(user, data.orderNumber);

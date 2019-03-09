@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * LINE webhook messageコントローラー
  */
 const createDebug = require("debug");
-const moment = require("moment");
 const request = require("request-promise-native");
 const LINE = require("../../../line");
 const debug = createDebug('cinerino-line-assistant:controller');
@@ -90,8 +89,15 @@ function pushButtonsReserveNumOrTel(userId, message) {
     return __awaiter(this, void 0, void 0, function* () {
         debug(userId, message);
         const datas = message.split('-');
-        const theater = datas[0];
-        const reserveNumOrTel = datas[1];
+        let theater = '';
+        let reserveNumOrTel = '';
+        if (datas.length > 1) {
+            theater = datas[0];
+            reserveNumOrTel = datas[1];
+        }
+        else {
+            reserveNumOrTel = datas[0];
+        }
         // キュー実行のボタン表示
         yield request.post({
             simple: false,
@@ -106,7 +112,7 @@ function pushButtonsReserveNumOrTel(userId, message) {
                         altText: 'aaa',
                         template: {
                             type: 'buttons',
-                            text: 'どちらで検索する？',
+                            text: 'どちらで検索しますか？',
                             actions: [
                                 {
                                     type: 'postback',
@@ -115,7 +121,7 @@ function pushButtonsReserveNumOrTel(userId, message) {
                                 },
                                 {
                                     type: 'postback',
-                                    label: '予約番号',
+                                    label: '確認番号',
                                     data: `action=searchTransactionByReserveNum&theater=${theater}&reserveNum=${reserveNumOrTel}`
                                 },
                                 {
@@ -137,45 +143,39 @@ exports.pushButtonsReserveNumOrTel = pushButtonsReserveNumOrTel;
  */
 function askFromWhenAndToWhen(userId) {
     return __awaiter(this, void 0, void 0, function* () {
-        // await LINE.pushMessage(userId, '期間をYYYYMMDD-YYYYMMDD形式で教えてください。');
-        yield request.post('https://api.line.me/v2/bot/message/push', {
-            auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
-            json: true,
-            body: {
-                to: userId,
-                messages: [
-                    {
-                        type: 'template',
-                        altText: '日付選択',
-                        template: {
-                            type: 'buttons',
-                            text: '日付を選択するか、期間をYYYYMMDD-YYYYMMDD形式で教えてください。',
-                            actions: [
-                                {
-                                    type: 'datetimepicker',
-                                    label: '日付選択',
-                                    mode: 'date',
-                                    data: 'action=searchTransactionsByDate',
-                                    initial: moment().format('YYYY-MM-DD')
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        }).promise();
+        yield LINE.pushMessage(userId, `Cinerino Consoleをご利用ください。 ${process.env.CINERINO_CONSOLE_ENDPOINT}`);
+        // await request.post(
+        //     'https://api.line.me/v2/bot/message/push',
+        //     {
+        //         auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+        //         json: true,
+        //         body: {
+        //             to: userId, // 送信相手のuserId
+        //             messages: [
+        //                 {
+        //                     type: 'template',
+        //                     altText: '日付選択',
+        //                     template: {
+        //                         type: 'buttons',
+        //                         text: '日付を選択するか、期間をYYYYMMDD-YYYYMMDD形式で教えてください。',
+        //                         actions: [
+        //                             {
+        //                                 type: 'datetimepicker',
+        //                                 label: '日付選択',
+        //                                 mode: 'date',
+        //                                 data: 'action=searchTransactionsByDate',
+        //                                 initial: moment().format('YYYY-MM-DD')
+        //                             }
+        //                         ]
+        //                     }
+        //                 }
+        //             ]
+        //         }
+        //     }
+        // ).promise();
     });
 }
 exports.askFromWhenAndToWhen = askFromWhenAndToWhen;
-/**
- * 取引CSVダウンロードURIを発行する
- */
-function publishURI4transactionsCSV(userId, _, __) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(userId, 'Cinerino Consoleをご利用ください');
-    });
-}
-exports.publishURI4transactionsCSV = publishURI4transactionsCSV;
 function logout(user) {
     return __awaiter(this, void 0, void 0, function* () {
         yield request.post({

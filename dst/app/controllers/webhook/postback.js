@@ -66,6 +66,49 @@ exports.searchTransactionById = searchTransactionById;
 function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
     return __awaiter(this, void 0, void 0, function* () {
         debug(user.userId, reserveNum);
+        // 劇場指定がなければ、販売者を確認する
+        if (theaterCode === '' || theaterCode === undefined) {
+            const sellerService = new cinerinoapi.service.Seller({
+                endpoint: API_ENDPOINT,
+                auth: user.authClient
+            });
+            const searchSellersResult = yield sellerService.search({});
+            yield request.post({
+                simple: false,
+                url: 'https://api.line.me/v2/bot/message/push',
+                auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+                json: true,
+                body: {
+                    to: user.userId,
+                    messages: [
+                        {
+                            type: 'template',
+                            altText: 'aaa',
+                            template: {
+                                type: 'buttons',
+                                text: '販売者を選択してください',
+                                actions: searchSellersResult.data
+                                    .filter((seller) => seller.location !== undefined)
+                                    // tslint:disable-next-line:no-magic-numbers
+                                    .slice(0, 3)
+                                    .map((seller) => {
+                                    if (seller.location === undefined) {
+                                        throw new Error('Seller location undefined');
+                                    }
+                                    const branchCode = seller.location.branchCode;
+                                    return {
+                                        type: 'postback',
+                                        label: seller.name.ja,
+                                        data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
+                                    };
+                                })
+                            }
+                        }
+                    ]
+                }
+            }).promise();
+            return;
+        }
         yield LINE.pushMessage(user.userId, '予約番号で検索しています...');
         // 注文検索
         const orderService = new cinerinoapi.service.Order({
@@ -632,13 +675,3 @@ function confirmReturnOrder(user, transactionId, pass) {
     });
 }
 exports.confirmReturnOrder = confirmReturnOrder;
-/**
- * 取引検索(csvダウンロード)
- * @param date YYYY-MM-DD形式
- */
-function searchTransactionsByDate(userId, _) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(userId, 'Cinerino Consoleをご利用ください');
-    });
-}
-exports.searchTransactionsByDate = searchTransactionsByDate;

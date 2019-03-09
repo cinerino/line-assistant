@@ -36,6 +36,11 @@ export async function message(event: LINE.IWebhookEvent, user: User) {
                         await MessageController.askTransactionInquiryKey(user);
                         break;
 
+                    // 予約番号 or 電話番号 or 取引IDで検索
+                    case /^\d{1,12}|\w{24}$/.test(messageText):
+                        await MessageController.pushButtonsReserveNumOrTel(userId, messageText);
+                        break;
+
                     // [劇場コード]-[予約番号 or 電話番号] or 取引IDで検索
                     case /^\d{3}-\d{1,12}|\w{24}$/.test(messageText):
                         await MessageController.pushButtonsReserveNumOrTel(userId, messageText);
@@ -44,12 +49,6 @@ export async function message(event: LINE.IWebhookEvent, user: User) {
                     // 取引csv要求
                     case /^csv$/.test(messageText):
                         await MessageController.askFromWhenAndToWhen(userId);
-                        break;
-
-                    // 取引csv期間指定
-                    case /^\d{8}-\d{8}$/.test(messageText):
-                        // tslint:disable-next-line:no-magic-numbers
-                        await MessageController.publishURI4transactionsCSV(userId, messageText.substr(0, 8), messageText.substr(9, 8));
                         break;
 
                     // ログアウト
@@ -115,10 +114,6 @@ export async function postback(event: LINE.IWebhookEvent, user: User) {
 
             case 'searchTransactionByTel':
                 await PostbackController.searchTransactionByTel(userId, <string>data.tel, <string>data.theater);
-                break;
-
-            case 'searchTransactionsByDate':
-                await PostbackController.searchTransactionsByDate(userId, <string>event.postback.params.date);
                 break;
 
             case 'startReturnOrder':

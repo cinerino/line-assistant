@@ -2,7 +2,6 @@
  * LINE webhook messageコントローラー
  */
 import * as createDebug from 'debug';
-import * as moment from 'moment';
 import * as request from 'request-promise-native';
 
 import * as LINE from '../../../line';
@@ -81,8 +80,15 @@ export async function askTransactionInquiryKey(user: User) {
 export async function pushButtonsReserveNumOrTel(userId: string, message: string) {
     debug(userId, message);
     const datas = message.split('-');
-    const theater = datas[0];
-    const reserveNumOrTel = datas[1];
+
+    let theater: string = '';
+    let reserveNumOrTel: string = '';
+    if (datas.length > 1) {
+        theater = datas[0];
+        reserveNumOrTel = datas[1];
+    } else {
+        reserveNumOrTel = datas[0];
+    }
 
     // キュー実行のボタン表示
     await request.post({
@@ -98,7 +104,7 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                     altText: 'aaa',
                     template: {
                         type: 'buttons',
-                        text: 'どちらで検索する？',
+                        text: 'どちらで検索しますか？',
                         actions: [
                             {
                                 type: 'postback',
@@ -107,7 +113,7 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                             },
                             {
                                 type: 'postback',
-                                label: '予約番号',
+                                label: '確認番号',
                                 data: `action=searchTransactionByReserveNum&theater=${theater}&reserveNum=${reserveNumOrTel}`
                             },
                             {
@@ -127,44 +133,36 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
  * 日付選択を求める
  */
 export async function askFromWhenAndToWhen(userId: string) {
-    // await LINE.pushMessage(userId, '期間をYYYYMMDD-YYYYMMDD形式で教えてください。');
-    await request.post(
-        'https://api.line.me/v2/bot/message/push',
-        {
-            auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
-            json: true,
-            body: {
-                to: userId, // 送信相手のuserId
-                messages: [
-                    {
-                        type: 'template',
-                        altText: '日付選択',
-                        template: {
-                            type: 'buttons',
-                            text: '日付を選択するか、期間をYYYYMMDD-YYYYMMDD形式で教えてください。',
-                            actions: [
-                                {
-                                    type: 'datetimepicker',
-                                    label: '日付選択',
-                                    mode: 'date',
-                                    data: 'action=searchTransactionsByDate',
-                                    initial: moment().format('YYYY-MM-DD')
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        }
-    ).promise();
-
-}
-
-/**
- * 取引CSVダウンロードURIを発行する
- */
-export async function publishURI4transactionsCSV(userId: string, _: string, __: string) {
-    await LINE.pushMessage(userId, 'Cinerino Consoleをご利用ください');
+    await LINE.pushMessage(userId, `Cinerino Consoleをご利用ください。 ${process.env.CINERINO_CONSOLE_ENDPOINT}`);
+    // await request.post(
+    //     'https://api.line.me/v2/bot/message/push',
+    //     {
+    //         auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+    //         json: true,
+    //         body: {
+    //             to: userId, // 送信相手のuserId
+    //             messages: [
+    //                 {
+    //                     type: 'template',
+    //                     altText: '日付選択',
+    //                     template: {
+    //                         type: 'buttons',
+    //                         text: '日付を選択するか、期間をYYYYMMDD-YYYYMMDD形式で教えてください。',
+    //                         actions: [
+    //                             {
+    //                                 type: 'datetimepicker',
+    //                                 label: '日付選択',
+    //                                 mode: 'date',
+    //                                 data: 'action=searchTransactionsByDate',
+    //                                 initial: moment().format('YYYY-MM-DD')
+    //                             }
+    //                         ]
+    //                     }
+    //                 }
+    //             ]
+    //         }
+    //     }
+    // ).promise();
 }
 
 export async function logout(user: User) {
