@@ -74,26 +74,28 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
             auth: user.authClient
         });
         const searchSellersResult = await sellerService.search({});
+        const sellers = searchSellersResult.data.filter((seller) => seller.location !== undefined);
 
-        await request.post({
-            simple: false,
-            url: 'https://api.line.me/v2/bot/message/push',
-            auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
-            json: true,
-            body: {
-                to: user.userId,
-                messages: [
-                    {
-                        type: 'template',
-                        altText: 'aaa',
-                        template: {
-                            type: 'buttons',
-                            text: '販売者を選択してください',
-                            actions: searchSellersResult.data
-                                .filter((seller) => seller.location !== undefined)
-                                // tslint:disable-next-line:no-magic-numbers
-                                .slice(0, 3)
-                                .map((seller) => {
+        const LIMIT = 4;
+        const pushCount = (sellers.length % LIMIT) + 1;
+        await Promise.all([...Array(pushCount)].map(async (_, i) => {
+            const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
+
+            await request.post({
+                simple: false,
+                url: 'https://api.line.me/v2/bot/message/push',
+                auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+                json: true,
+                body: {
+                    to: user.userId,
+                    messages: [
+                        {
+                            type: 'template',
+                            altText: 'aaa',
+                            template: {
+                                type: 'buttons',
+                                text: '販売者を選択してください',
+                                actions: sellerChoices.map((seller) => {
                                     if (seller.location === undefined) {
                                         throw new Error('Seller location undefined');
                                     }
@@ -106,11 +108,12 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
                                         data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
                                     };
                                 })
+                            }
                         }
-                    }
-                ]
-            }
-        }).promise();
+                    ]
+                }
+            }).promise();
+        }));
 
         return;
     }

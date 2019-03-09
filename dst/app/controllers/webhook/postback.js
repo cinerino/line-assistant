@@ -73,40 +73,42 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
                 auth: user.authClient
             });
             const searchSellersResult = yield sellerService.search({});
-            yield request.post({
-                simple: false,
-                url: 'https://api.line.me/v2/bot/message/push',
-                auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
-                json: true,
-                body: {
-                    to: user.userId,
-                    messages: [
-                        {
-                            type: 'template',
-                            altText: 'aaa',
-                            template: {
-                                type: 'buttons',
-                                text: '販売者を選択してください',
-                                actions: searchSellersResult.data
-                                    .filter((seller) => seller.location !== undefined)
-                                    // tslint:disable-next-line:no-magic-numbers
-                                    .slice(0, 3)
-                                    .map((seller) => {
-                                    if (seller.location === undefined) {
-                                        throw new Error('Seller location undefined');
-                                    }
-                                    const branchCode = seller.location.branchCode;
-                                    return {
-                                        type: 'postback',
-                                        label: seller.name.ja,
-                                        data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
-                                    };
-                                })
+            const sellers = searchSellersResult.data.filter((seller) => seller.location !== undefined);
+            const LIMIT = 4;
+            const pushCount = (sellers.length % LIMIT) + 1;
+            yield Promise.all([...Array(pushCount)].map((_, i) => __awaiter(this, void 0, void 0, function* () {
+                const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
+                yield request.post({
+                    simple: false,
+                    url: 'https://api.line.me/v2/bot/message/push',
+                    auth: { bearer: process.env.LINE_BOT_CHANNEL_ACCESS_TOKEN },
+                    json: true,
+                    body: {
+                        to: user.userId,
+                        messages: [
+                            {
+                                type: 'template',
+                                altText: 'aaa',
+                                template: {
+                                    type: 'buttons',
+                                    text: '販売者を選択してください',
+                                    actions: sellerChoices.map((seller) => {
+                                        if (seller.location === undefined) {
+                                            throw new Error('Seller location undefined');
+                                        }
+                                        const branchCode = seller.location.branchCode;
+                                        return {
+                                            type: 'postback',
+                                            label: seller.name.ja,
+                                            data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
+                                        };
+                                    })
+                                }
                             }
-                        }
-                    ]
-                }
-            }).promise();
+                        ]
+                    }
+                }).promise();
+            })));
             return;
         }
         yield LINE.pushMessage(user.userId, '予約番号で検索しています...');
