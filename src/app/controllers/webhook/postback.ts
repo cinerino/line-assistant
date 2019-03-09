@@ -5,6 +5,7 @@ import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as createDebug from 'debug';
 import * as moment from 'moment';
 import * as otplib from 'otplib';
+import * as querystring from 'querystring';
 import * as request from 'request-promise-native';
 import * as util from 'util';
 
@@ -64,11 +65,11 @@ export async function searchTransactionById(user: User, transactionId: string) {
 /**
  * 予約番号で取引を検索する
  */
-export async function searchTransactionByReserveNum(user: User, reserveNum: string, theaterCode: string) {
+export async function searchTransactionByReserveNum(user: User, reserveNum: string, _: string, sellerId: string) {
     debug(user.userId, reserveNum);
 
     // 劇場指定がなければ、販売者を確認する
-    if (theaterCode === '' || theaterCode === undefined) {
+    if (sellerId === '' || sellerId === undefined) {
         const sellerService = new cinerinoapi.service.Seller({
             endpoint: API_ENDPOINT,
             auth: user.authClient
@@ -78,7 +79,7 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
 
         const LIMIT = 4;
         const pushCount = (sellers.length % LIMIT) + 1;
-        await Promise.all([...Array(pushCount)].map(async (_, i) => {
+        for (const [i] of [...Array(pushCount)].entries()) {
             const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
 
             await request.post({
@@ -94,7 +95,7 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
                             altText: 'aaa',
                             template: {
                                 type: 'buttons',
-                                text: '販売者を選択してください',
+                                text: (i === 0) ? '販売者を選択してください' : undefined,
                                 actions: sellerChoices.map((seller) => {
                                     if (seller.location === undefined) {
                                         throw new Error('Seller location undefined');
@@ -105,7 +106,12 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
                                     return {
                                         type: 'postback',
                                         label: seller.name.ja,
-                                        data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
+                                        data: querystring.stringify({
+                                            action: 'searchTransactionByReserveNum',
+                                            seller: seller.id,
+                                            theater: branchCode,
+                                            reserveNum: reserveNum
+                                        })
                                     };
                                 })
                             }
@@ -113,7 +119,7 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
                     ]
                 }
             }).promise();
-        }));
+        }
 
         return;
     }
@@ -127,17 +133,18 @@ export async function searchTransactionByReserveNum(user: User, reserveNum: stri
     });
     const searchOrdersResult = await orderService.search({
         confirmationNumbers: [reserveNum.toString()],
-        acceptedOffers: {
-            itemOffered: {
-                reservationFor: {
-                    superEvent: {
-                        location: {
-                            branchCodes: [theaterCode.toString()]
-                        }
-                    }
-                }
-            }
-        }
+        seller: { ids: [sellerId] }
+        // acceptedOffers: {
+        //     itemOffered: {
+        //         reservationFor: {
+        //             superEvent: {
+        //                 location: {
+        //                     branchCodes: [theaterCode.toString()]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     });
     const order = searchOrdersResult.data.shift();
     if (order === undefined) {

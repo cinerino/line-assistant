@@ -99,7 +99,7 @@ function postback(event, user) {
         try {
             switch (data.action) {
                 case 'searchTransactionByReserveNum':
-                    yield PostbackController.searchTransactionByReserveNum(user, data.reserveNum, data.theater);
+                    yield PostbackController.searchTransactionByReserveNum(user, data.reserveNum, data.theater, data.seller);
                     break;
                 case 'searchTransactionById':
                     yield PostbackController.searchTransactionById(user, data.transaction);

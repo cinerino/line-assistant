@@ -105,7 +105,9 @@ export async function postback(event: LINE.IWebhookEvent, user: User) {
     try {
         switch (data.action) {
             case 'searchTransactionByReserveNum':
-                await PostbackController.searchTransactionByReserveNum(user, <string>data.reserveNum, <string>data.theater);
+                await PostbackController.searchTransactionByReserveNum(
+                    user, <string>data.reserveNum, <string>data.theater, <string>data.seller
+                );
                 break;
 
             case 'searchTransactionById':

@@ -15,6 +15,7 @@ const cinerinoapi = require("@cinerino/api-nodejs-client");
 const createDebug = require("debug");
 const moment = require("moment");
 const otplib = require("otplib");
+const querystring = require("querystring");
 const request = require("request-promise-native");
 const util = require("util");
 const LINE = require("../../../line");
@@ -63,11 +64,11 @@ exports.searchTransactionById = searchTransactionById;
 /**
  * 予約番号で取引を検索する
  */
-function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
+function searchTransactionByReserveNum(user, reserveNum, _, sellerId) {
     return __awaiter(this, void 0, void 0, function* () {
         debug(user.userId, reserveNum);
         // 劇場指定がなければ、販売者を確認する
-        if (theaterCode === '' || theaterCode === undefined) {
+        if (sellerId === '' || sellerId === undefined) {
             const sellerService = new cinerinoapi.service.Seller({
                 endpoint: API_ENDPOINT,
                 auth: user.authClient
@@ -76,7 +77,7 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
             const sellers = searchSellersResult.data.filter((seller) => seller.location !== undefined);
             const LIMIT = 4;
             const pushCount = (sellers.length % LIMIT) + 1;
-            yield Promise.all([...Array(pushCount)].map((_, i) => __awaiter(this, void 0, void 0, function* () {
+            for (const [i] of [...Array(pushCount)].entries()) {
                 const sellerChoices = sellers.slice(LIMIT * i, LIMIT * (i + 1));
                 yield request.post({
                     simple: false,
@@ -91,7 +92,7 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
                                 altText: 'aaa',
                                 template: {
                                     type: 'buttons',
-                                    text: '販売者を選択してください',
+                                    text: (i === 0) ? '販売者を選択してください' : undefined,
                                     actions: sellerChoices.map((seller) => {
                                         if (seller.location === undefined) {
                                             throw new Error('Seller location undefined');
@@ -100,7 +101,12 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
                                         return {
                                             type: 'postback',
                                             label: seller.name.ja,
-                                            data: `action=searchTransactionByReserveNum&theater=${branchCode}&reserveNum=${reserveNum}`
+                                            data: querystring.stringify({
+                                                action: 'searchTransactionByReserveNum',
+                                                seller: seller.id,
+                                                theater: branchCode,
+                                                reserveNum: reserveNum
+                                            })
                                         };
                                     })
                                 }
@@ -108,7 +114,7 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
                         ]
                     }
                 }).promise();
-            })));
+            }
             return;
         }
         yield LINE.pushMessage(user.userId, '予約番号で検索しています...');
@@ -119,17 +125,18 @@ function searchTransactionByReserveNum(user, reserveNum, theaterCode) {
         });
         const searchOrdersResult = yield orderService.search({
             confirmationNumbers: [reserveNum.toString()],
-            acceptedOffers: {
-                itemOffered: {
-                    reservationFor: {
-                        superEvent: {
-                            location: {
-                                branchCodes: [theaterCode.toString()]
-                            }
-                        }
-                    }
-                }
-            }
+            seller: { ids: [sellerId] }
+            // acceptedOffers: {
+            //     itemOffered: {
+            //         reservationFor: {
+            //             superEvent: {
+            //                 location: {
+            //                     branchCodes: [theaterCode.toString()]
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
         });
         const order = searchOrdersResult.data.shift();
         if (order === undefined) {
