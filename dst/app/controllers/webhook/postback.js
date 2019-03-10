@@ -432,19 +432,19 @@ ${taskStrs}
             {
                 type: 'postback',
                 label: '再照会する',
-                data: `action = searchTransactionById & transaction=${transaction.id} `
+                data: `action=searchTransactionById&transaction=${transaction.id}`
             }
         ];
         if (order.orderStatus === cinerinoapi.factory.orderStatus.OrderDelivered) {
             // postActions.push({
             //     type: 'postback',
             //     label: 'メール送信',
-            //     data: `action = pushNotification & transaction=${ transaction.id } `
+            //     data: `action=pushNotification&transaction=${transaction.id }`
             // });
             postActions.push({
                 type: 'postback',
                 label: '返品する',
-                data: `action = startReturnOrder & orderNumber=${order.orderNumber} `
+                data: `action=startReturnOrder&orderNumber=${order.orderNumber}`
             });
         }
         if (postActions.length > 0) {
@@ -477,7 +477,7 @@ ${taskStrs}
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function pushExpiredTransactionDetails(user, transactionId) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(user.userId, `${transactionId} の取引詳細をまとめています...`);
+        yield LINE.pushMessage(user.userId, `${transactionId}の取引詳細をまとめています...`);
         // 取引検索
         const placeOrderService = new cinerinoapi.service.txn.PlaceOrder({
             endpoint: API_ENDPOINT,
@@ -489,7 +489,7 @@ function pushExpiredTransactionDetails(user, transactionId) {
         });
         const transaction = searchResult.data.shift();
         if (transaction === undefined) {
-            yield LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId} `);
+            yield LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId}`);
             return;
         }
         const actions = yield placeOrderService.searchActionsByTransactionId({
@@ -655,7 +655,7 @@ function startReturnOrder(user, orderNumber) {
         const pass = otplib.authenticator.generate(secret);
         const postEvent = {
             postback: {
-                data: `action = confirmReturnOrder & transaction=${returnOrderTransaction.id}& pass=${pass} `
+                data: `action=confirmReturnOrder&transaction=${returnOrderTransaction.id}&pass=${pass}`
             },
             // replyToken: '26d0dd0923a94583871ecd7e6efec8e2',
             source: {

@@ -502,19 +502,19 @@ ${taskStrs}
         {
             type: 'postback',
             label: '再照会する',
-            data: `action = searchTransactionById & transaction=${transaction.id} `
+            data: `action=searchTransactionById&transaction=${transaction.id}`
         }
     ];
     if (order.orderStatus === cinerinoapi.factory.orderStatus.OrderDelivered) {
         // postActions.push({
         //     type: 'postback',
         //     label: 'メール送信',
-        //     data: `action = pushNotification & transaction=${ transaction.id } `
+        //     data: `action=pushNotification&transaction=${transaction.id }`
         // });
         postActions.push({
             type: 'postback',
             label: '返品する',
-            data: `action = startReturnOrder & orderNumber=${order.orderNumber} `
+            data: `action=startReturnOrder&orderNumber=${order.orderNumber}`
         });
     }
 
@@ -547,7 +547,7 @@ ${taskStrs}
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 async function pushExpiredTransactionDetails(user: User, transactionId: string) {
-    await LINE.pushMessage(user.userId, `${transactionId} の取引詳細をまとめています...`);
+    await LINE.pushMessage(user.userId, `${transactionId}の取引詳細をまとめています...`);
 
     // 取引検索
     const placeOrderService = new cinerinoapi.service.txn.PlaceOrder({
@@ -560,7 +560,7 @@ async function pushExpiredTransactionDetails(user: User, transactionId: string) 
     });
     const transaction = searchResult.data.shift();
     if (transaction === undefined) {
-        await LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId} `);
+        await LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId}`);
 
         return;
 
@@ -679,45 +679,45 @@ async function pushExpiredTransactionDetails(user: User, transactionId: string) 
     const transactionDetails = [`----------------------------
 注文取引概要
 ----------------------------
-${ transaction.id}
-${ transaction.status}
+${transaction.id}
+${transaction.status}
 ----------------------------
 販売者情報
 ----------------------------
-${ transaction.seller.typeOf}
-${ transaction.seller.id}
-${ transaction.seller.identifier}
-${ transaction.seller.name.ja}
-${ transaction.seller.url}
+${transaction.seller.typeOf}
+${transaction.seller.id}
+${transaction.seller.identifier}
+${transaction.seller.name.ja}
+${transaction.seller.url}
 ----------------------------
 購入者情報
 ----------------------------
-${ (customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
-${ (customerContact !== undefined) ? customerContact.telephone : ''}
-${ (customerContact !== undefined) ? customerContact.email : ''}
-${ (transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
+${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
+${(customerContact !== undefined) ? customerContact.telephone : ''}
+${(customerContact !== undefined) ? customerContact.email : ''}
+${(transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
 `,
     `----------------------------
 注文取引
-${ transaction.id}
+${transaction.id}
 ----------------------------
 取引進行クライアント
 ----------------------------
-${ (transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
-${ (transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
 取引状況
 ----------------------------
-${ moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
-${ moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 期限切れ
+${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 期限切れ
 ----------------------------
 承認アクション履歴
 ----------------------------
-${ actionStrs}
+${actionStrs}
 ----------------------------
 取引処理履歴
 ----------------------------
-${ taskStrs}
+${taskStrs}
 `]
         ;
 
@@ -749,7 +749,7 @@ export async function startReturnOrder(user: User, orderNumber: string) {
     const pass = otplib.authenticator.generate(secret);
     const postEvent = {
         postback: {
-            data: `action = confirmReturnOrder & transaction=${returnOrderTransaction.id}& pass=${pass} `
+            data: `action=confirmReturnOrder&transaction=${returnOrderTransaction.id}&pass=${pass}`
         },
         // replyToken: '26d0dd0923a94583871ecd7e6efec8e2',
         source: {
