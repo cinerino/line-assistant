@@ -127,6 +127,8 @@ export async function searchTransactionByConditions(params: {
         sellerId: string;
     };
 }) {
+    await LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${Object.keys(params.conditions).join(',')}`);
+
     if (params.conditions.confirmationNumber !== undefined
         && params.conditions.telephone !== undefined) {
         await LINE.pushMessage(params.user.userId, '検索条件が足りません');

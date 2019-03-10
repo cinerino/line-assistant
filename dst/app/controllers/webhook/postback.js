@@ -114,6 +114,7 @@ exports.selectSeller = selectSeller;
  */
 function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${Object.keys(params.conditions).join(',')}`);
         if (params.conditions.confirmationNumber !== undefined
             && params.conditions.telephone !== undefined) {
             yield LINE.pushMessage(params.user.userId, '検索条件が足りません');

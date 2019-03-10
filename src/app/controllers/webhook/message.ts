@@ -116,11 +116,9 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                                 type: 'postback',
                                 label: '確認番号',
                                 data: querystring.stringify({
-                                    // ...params.conditions,
                                     action: 'searchTransactionByConditions',
                                     confirmationNumber: searchingText
                                 })
-                                // `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
                             },
                             {
                                 type: 'postback',
