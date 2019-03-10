@@ -63,6 +63,12 @@ function searchTransactionById(user, transactionId) {
 exports.searchTransactionById = searchTransactionById;
 function selectSeller(params) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield LINE.pushMessage(params.user.userId, `${JSON.stringify({
+            // ...params.conditions,
+            action: 'searchTransactionByConditions',
+            confirmationNumber: params.conditions.confirmationNumber,
+            telephone: params.conditions.telephone
+        })}`);
         const sellerService = new cinerinoapi.service.Seller({
             endpoint: API_ENDPOINT,
             auth: params.user.authClient
@@ -97,7 +103,8 @@ function selectSeller(params) {
                                             seller: seller.id,
                                             confirmationNumber: params.conditions.confirmationNumber,
                                             telephone: params.conditions.telephone
-                                        })
+                                        }),
+                                        displayText: `${seller.name.ja}で検索します...`
                                     };
                                 })
                             }
@@ -114,7 +121,7 @@ exports.selectSeller = selectSeller;
  */
 function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${Object.keys(params.conditions).join(',')}`);
+        yield LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${JSON.stringify(params.conditions)}`);
         if (params.conditions.confirmationNumber !== undefined
             && params.conditions.telephone !== undefined) {
             yield LINE.pushMessage(params.user.userId, '検索条件が足りません');
@@ -351,70 +358,70 @@ function pushTransactionDetails(user, orderNumber) {
         // }
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
-注文状態
+        注文状態
 ----------------------------
-${order.orderNumber}
+        ${order.orderNumber}
 ${order.confirmationNumber}
 ${order.orderStatus}
 ----------------------------
-注文処理履歴
+        注文処理履歴
 ----------------------------
-${actionStrs}
+        ${actionStrs}
 ----------------------------
-注文アイテム状態
+        注文アイテム状態
 ----------------------------
-${ownershipInfosStr}
-`,
+        ${ownershipInfosStr}
+            `,
             `----------------------------
-販売者情報-${order.orderNumber}
+        販売者情報 - ${order.orderNumber}
 ----------------------------
-${transaction.seller.typeOf}
+        ${transaction.seller.typeOf}
 ${transaction.seller.id}
 ${transaction.seller.identifier}
 ${transaction.seller.name.ja}
 ${transaction.seller.url}
 ----------------------------
-購入者情報
+        購入者情報
 ----------------------------
-${order.customer.name}
+        ${order.customer.name}
 ${order.customer.telephone}
 ${order.customer.email}
 ${(order.customer.memberOf !== undefined) ? `${order.customer.memberOf.membershipNumber}` : '非会員'}
 ----------------------------
-座席予約
+    座席予約
 ----------------------------
-${(event !== undefined) ? event.name.ja : ''}
+    ${(event !== undefined) ? event.name.ja : ''}
 ${(event !== undefined) ? `${moment(event.startDate).format('YYYY-MM-DD HH:mm')}-${moment(event.endDate).format('HH:mm')}` : ''}
 ${reservations.map((i) => `${i.typeOf} ${i.name} x${i.numItems} ￥${i.totalPrice}`)}
 ----------------------------
-決済方法
+    決済方法
 ----------------------------
-${order.paymentMethods[0].typeOf}
+    ${order.paymentMethods[0].typeOf}
 ${order.paymentMethods[0].paymentMethodId}
 ${order.price}
 ----------------------------
-割引
+    割引
 ----------------------------
-`,
+    `,
             `----------------------------
-注文取引-${order.orderNumber}
+    注文取引 - ${order.orderNumber}
 ----------------------------
-${transaction.id}
+    ${transaction.id}
 ${transaction.status}
 ----------------------------
-取引進行クライアント
+    取引進行クライアント
 ----------------------------
-${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+    ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
 ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
-取引状況
+    取引状況
 ----------------------------
-${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+    ${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
 ${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 成立
 ----------------------------
-取引処理履歴
+    取引処理履歴
 ----------------------------
-${taskStrs}
+    ${taskStrs}
 `];
         yield Promise.all(transactionDetails.map((text) => __awaiter(this, void 0, void 0, function* () {
             yield LINE.pushMessage(user.userId, text);
@@ -424,19 +431,19 @@ ${taskStrs}
             {
                 type: 'postback',
                 label: '再照会する',
-                data: `action=searchTransactionById&transaction=${transaction.id}`
+                data: `action = searchTransactionById & transaction=${transaction.id} `
             }
         ];
         if (order.orderStatus === cinerinoapi.factory.orderStatus.OrderDelivered) {
             // postActions.push({
             //     type: 'postback',
             //     label: 'メール送信',
-            //     data: `action=pushNotification&transaction=${transaction.id}`
+            //     data: `action = pushNotification & transaction=${ transaction.id } `
             // });
             postActions.push({
                 type: 'postback',
                 label: '返品する',
-                data: `action=startReturnOrder&orderNumber=${order.orderNumber}`
+                data: `action = startReturnOrder & orderNumber=${order.orderNumber} `
             });
         }
         if (postActions.length > 0) {
@@ -469,7 +476,7 @@ ${taskStrs}
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function pushExpiredTransactionDetails(user, transactionId) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(user.userId, `${transactionId}の取引詳細をまとめています...`);
+        yield LINE.pushMessage(user.userId, `${transactionId} の取引詳細をまとめています...`);
         // 取引検索
         const placeOrderService = new cinerinoapi.service.txn.PlaceOrder({
             endpoint: API_ENDPOINT,
@@ -481,7 +488,7 @@ function pushExpiredTransactionDetails(user, transactionId) {
         });
         const transaction = searchResult.data.shift();
         if (transaction === undefined) {
-            yield LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId}`);
+            yield LINE.pushMessage(user.userId, `存在しない取引IDです: ${transactionId} `);
             return;
         }
         const actions = yield placeOrderService.searchActionsByTransactionId({
@@ -535,7 +542,7 @@ function pushExpiredTransactionDetails(user, transactionId) {
         const actionStrs = actions
             .sort((a, b) => moment(a.endDate).unix() - moment(b.endDate).unix())
             .map((action) => {
-            let actionName = `${action.typeOf} of ${action.object.typeOf}`;
+            let actionName = `${action.typeOf} of ${action.object.typeOf} `;
             if (action.purpose !== undefined) {
                 actionName += ` for ${action.purpose.typeOf}`;
             }
@@ -577,47 +584,47 @@ function pushExpiredTransactionDetails(user, transactionId) {
         const customerContact = transaction.object.customerContact;
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
-注文取引概要
+    注文取引概要
 ----------------------------
-${transaction.id}
+    ${transaction.id}
 ${transaction.status}
 ----------------------------
-販売者情報
+    販売者情報
 ----------------------------
-${transaction.seller.typeOf}
+    ${transaction.seller.typeOf}
 ${transaction.seller.id}
 ${transaction.seller.identifier}
 ${transaction.seller.name.ja}
 ${transaction.seller.url}
 ----------------------------
-購入者情報
+    購入者情報
 ----------------------------
-${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
+    ${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
 ${(customerContact !== undefined) ? customerContact.telephone : ''}
 ${(customerContact !== undefined) ? customerContact.email : ''}
 ${(transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
 `,
             `----------------------------
-注文取引
+    注文取引
 ${transaction.id}
 ----------------------------
-取引進行クライアント
+    取引進行クライアント
 ----------------------------
-${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+    ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
 ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
-取引状況
+    取引状況
 ----------------------------
-${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+    ${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
 ${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 期限切れ
 ----------------------------
-承認アクション履歴
+    承認アクション履歴
 ----------------------------
-${actionStrs}
+    ${actionStrs}
 ----------------------------
-取引処理履歴
+    取引処理履歴
 ----------------------------
-${taskStrs}
+    ${taskStrs}
 `];
         yield Promise.all(transactionDetails.map((text) => __awaiter(this, void 0, void 0, function* () {
             yield LINE.pushMessage(user.userId, text);
@@ -647,7 +654,7 @@ function startReturnOrder(user, orderNumber) {
         const pass = otplib.authenticator.generate(secret);
         const postEvent = {
             postback: {
-                data: `action=confirmReturnOrder&transaction=${returnOrderTransaction.id}&pass=${pass}`
+                data: `action = confirmReturnOrder & transaction=${returnOrderTransaction.id}& pass=${pass} `
             },
             // replyToken: '26d0dd0923a94583871ecd7e6efec8e2',
             source: {
