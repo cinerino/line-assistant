@@ -142,7 +142,7 @@ export async function searchTransactionByConditions(params: {
         return;
     }
 
-    await LINE.pushMessage(params.user.userId, `取引を検索しています...${JSON.stringify(params.conditions)}`);
+    await LINE.pushMessage(params.user.userId, `取引を検索しています...${JSON.stringify(params.conditions, null, '\t')}`);
 
     // 注文検索
     const orderService = new cinerinoapi.service.Order({
@@ -150,12 +150,12 @@ export async function searchTransactionByConditions(params: {
         auth: params.user.authClient
     });
     const searchOrdersResult = await orderService.search({
-        confirmationNumbers: (params.conditions.confirmationNumber !== undefined)
+        confirmationNumbers: (params.conditions.confirmationNumber !== undefined && params.conditions.confirmationNumber !== '')
             ? [params.conditions.confirmationNumber.toString()]
             : undefined,
         seller: { ids: [params.conditions.sellerId] },
         customer: {
-            telephone: (params.conditions.telephone !== undefined)
+            telephone: (params.conditions.telephone !== undefined && params.conditions.telephone !== '')
                 ? params.conditions.telephone
                 : undefined
         }
