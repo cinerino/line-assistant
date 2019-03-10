@@ -120,13 +120,15 @@ function searchTransactionByConditions(params) {
             yield selectSeller(params);
             return;
         }
-        yield LINE.pushMessage(params.user.userId, `取引を検索しています...${JSON.stringify(params.conditions, null, '\t')}`);
+        yield LINE.pushMessage(params.user.userId, `取引を検索しています...\n${JSON.stringify(params.conditions, null, '\t')}`);
         // 注文検索
         const orderService = new cinerinoapi.service.Order({
             endpoint: API_ENDPOINT,
             auth: params.user.authClient
         });
         const searchOrdersResult = yield orderService.search({
+            limit: 1,
+            sort: { orderDate: cinerinoapi.factory.sortType.Descending },
             confirmationNumbers: (params.conditions.confirmationNumber !== undefined && params.conditions.confirmationNumber !== '')
                 ? [params.conditions.confirmationNumber.toString()]
                 : undefined,
@@ -142,6 +144,7 @@ function searchTransactionByConditions(params) {
             yield LINE.pushMessage(params.user.userId, MESSAGE_TRANSACTION_NOT_FOUND);
             return;
         }
+        yield LINE.pushMessage(params.user.userId, `注文が見つかりました...${order.orderNumber}`);
         yield pushTransactionDetails(params.user, order.orderNumber);
     });
 }
