@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * LINE webhook messageコントローラー
  */
 const createDebug = require("debug");
+const querystring = require("querystring");
 const request = require("request-promise-native");
 const LINE = require("../../../line");
 const debug = createDebug('cinerino-line-assistant:controller');
@@ -122,7 +123,12 @@ function pushButtonsReserveNumOrTel(userId, message) {
                                 {
                                     type: 'postback',
                                     label: '確認番号',
-                                    data: `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
+                                    data: querystring.stringify({
+                                        // ...params.conditions,
+                                        action: 'searchTransactionByConditions',
+                                        confirmationNumber: searchingText
+                                    })
+                                    // `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
                                 },
                                 {
                                     type: 'postback',

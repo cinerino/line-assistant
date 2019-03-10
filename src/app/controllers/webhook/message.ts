@@ -2,6 +2,7 @@
  * LINE webhook messageコントローラー
  */
 import * as createDebug from 'debug';
+import * as querystring from 'querystring';
 import * as request from 'request-promise-native';
 
 import * as LINE from '../../../line';
@@ -114,7 +115,12 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                             {
                                 type: 'postback',
                                 label: '確認番号',
-                                data: `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
+                                data: querystring.stringify({
+                                    // ...params.conditions,
+                                    action: 'searchTransactionByConditions',
+                                    confirmationNumber: searchingText
+                                })
+                                // `action=searchTransactionByConditions&confirmationNumber=${searchingText}`
                             },
                             {
                                 type: 'postback',
