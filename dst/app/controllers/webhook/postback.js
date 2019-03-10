@@ -63,12 +63,6 @@ function searchTransactionById(user, transactionId) {
 exports.searchTransactionById = searchTransactionById;
 function selectSeller(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(params.user.userId, `${JSON.stringify({
-            // ...params.conditions,
-            action: 'searchTransactionByConditions',
-            confirmationNumber: params.conditions.confirmationNumber,
-            telephone: params.conditions.telephone
-        })}`);
         const sellerService = new cinerinoapi.service.Seller({
             endpoint: API_ENDPOINT,
             auth: params.user.authClient
@@ -97,13 +91,7 @@ function selectSeller(params) {
                                     return {
                                         type: 'postback',
                                         label: seller.name.ja,
-                                        data: querystring.stringify({
-                                            // ...params.conditions,
-                                            action: 'searchTransactionByConditions',
-                                            seller: seller.id,
-                                            confirmationNumber: params.conditions.confirmationNumber,
-                                            telephone: params.conditions.telephone
-                                        }),
+                                        data: querystring.stringify(Object.assign({}, params.conditions, { action: 'searchTransactionByConditions', seller: seller.id })),
                                         displayText: `${seller.name.ja}で検索します...`
                                     };
                                 })
@@ -121,9 +109,8 @@ exports.selectSeller = selectSeller;
  */
 function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${JSON.stringify(params.conditions)}`);
-        if (params.conditions.confirmationNumber !== undefined
-            && params.conditions.telephone !== undefined) {
+        if (params.conditions.confirmationNumber === undefined
+            && params.conditions.telephone === undefined) {
             yield LINE.pushMessage(params.user.userId, '検索条件が足りません');
             return;
         }

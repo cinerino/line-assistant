@@ -71,13 +71,6 @@ export async function selectSeller(params: {
     user: User;
     conditions: ISearchPlaceOrderTransactionsConditions;
 }) {
-    await LINE.pushMessage(params.user.userId, `${JSON.stringify({
-        // ...params.conditions,
-        action: 'searchTransactionByConditions',
-        confirmationNumber: params.conditions.confirmationNumber,
-        telephone: params.conditions.telephone
-    })}`);
-
     const sellerService = new cinerinoapi.service.Seller({
         endpoint: API_ENDPOINT,
         auth: params.user.authClient
@@ -109,11 +102,9 @@ export async function selectSeller(params: {
                                     type: 'postback',
                                     label: seller.name.ja,
                                     data: querystring.stringify({
-                                        // ...params.conditions,
+                                        ...params.conditions,
                                         action: 'searchTransactionByConditions',
-                                        seller: seller.id,
-                                        confirmationNumber: params.conditions.confirmationNumber,
-                                        telephone: params.conditions.telephone
+                                        seller: seller.id
                                     }),
                                     displayText: `${seller.name.ja}で検索します...`
                                 };
@@ -135,10 +126,8 @@ export async function searchTransactionByConditions(params: {
         sellerId: string;
     };
 }) {
-    await LINE.pushMessage(params.user.userId, `取引を検索しようとしています...${JSON.stringify(params.conditions)}`);
-
-    if (params.conditions.confirmationNumber !== undefined
-        && params.conditions.telephone !== undefined) {
+    if (params.conditions.confirmationNumber === undefined
+        && params.conditions.telephone === undefined) {
         await LINE.pushMessage(params.user.userId, '検索条件が足りません');
 
         return;
