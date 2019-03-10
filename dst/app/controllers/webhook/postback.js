@@ -337,13 +337,41 @@ function pushTransactionDetails(user, orderNumber) {
             }
             return util.format('%s\n%s %s', moment(action.endDate).format('YYYY-MM-DD HH:mm:ss'), statusStr, actionName);
         }).join('\n');
-        const reservations = [];
-        const event = undefined;
-        // let event: any;
-        // if (order.acceptedOffers[0] !== undefined
-        //     && order.acceptedOffers[0].itemOffered.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation) {
-        //     reservation = order.acceptedOffers[0].itemOffered;
-        // }
+        const orderItems = order.acceptedOffers.map((acceptedOffer) => {
+            let numItems = 1;
+            let name = '';
+            if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
+                if (acceptedOffer.itemOffered.reservationFor !== undefined) {
+                    numItems = (acceptedOffer.itemOffered.numSeats !== undefined) ? acceptedOffer.itemOffered.numSeats : 1;
+                    name = util.format('%s\n%s-%s\n@%s %s', acceptedOffer.itemOffered.reservationFor.name.ja, moment(acceptedOffer.itemOffered.reservationFor.startDate).format('YY-MM-DD hh:mm'), moment(acceptedOffer.itemOffered.reservationFor.endDate).format('hh:mm'), acceptedOffer.itemOffered.reservationFor.superEvent.location.name.ja, acceptedOffer.itemOffered.reservationFor.location.name.ja);
+                }
+            }
+            else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
+                name = acceptedOffer.itemOffered.programName;
+            }
+            //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
+            // <%= (acceptedOffer.itemOffered.reservedTicket !== undefined) ? acceptedOffer.itemOffered.reservedTicket.ticketToken : '' %>
+            //  }
+            //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
+            // <% if (acceptedOffer.itemOffered.reservedTicket!==undefined) { %>
+            // <%= acceptedOffer.itemOffered.reservedTicket.ticketedSeat.seatNumber %>
+            // <% } %>
+            //  } else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
+            // <%= acceptedOffer.price %>
+            // <%= acceptedOffer.priceCurrency %>
+            // per
+            // <%= moment.duration(acceptedOffer.eligibleDuration.value, 'seconds').humanize() %>
+            //  }
+            //  acceptedOffer.price;
+            // acceptedOffer.priceCurrency;
+            return {
+                typeOf: acceptedOffer.itemOffered.typeOf,
+                name,
+                numItems,
+                price: acceptedOffer.price,
+                priceCurrency: acceptedOffer.priceCurrency
+            };
+        });
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
 注文状態
@@ -378,9 +406,7 @@ ${(order.customer.memberOf !== undefined) ? `${order.customer.memberOf.membershi
 ----------------------------
 座席予約
 ----------------------------
-${(event !== undefined) ? event.name.ja : ''}
-${(event !== undefined) ? `${moment(event.startDate).format('YYYY-MM-DD HH:mm')}-${moment(event.endDate).format('HH:mm')}` : ''}
-${reservations.map((i) => `${i.typeOf} ${i.name} x${i.numItems} ￥${i.totalPrice}`)}
+${orderItems.map((i) => `${i.typeOf} ${i.name} x${i.numItems}\n${i.price} ${i.priceCurrency}`)}
 ----------------------------
 決済方法
 ----------------------------
