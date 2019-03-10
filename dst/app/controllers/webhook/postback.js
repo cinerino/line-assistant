@@ -136,17 +136,6 @@ function searchTransactionByConditions(params) {
                     ? params.conditions.telephone
                     : undefined
             }
-            // acceptedOffers: {
-            //     itemOffered: {
-            //         reservationFor: {
-            //             superEvent: {
-            //                 location: {
-            //                     branchCodes: [theaterCode.toString()]
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
         });
         const order = searchOrdersResult.data.shift();
         if (order === undefined) {
@@ -200,7 +189,7 @@ function pushTransactionDetails(user, orderNumber) {
         //     (doc) => <cinerinoapi.factory.ownershipInfo.IOwnershipInfo<cinerinoapi.factory.ownershipInfo.IGoodType>>doc.toObject()
         // ));
         debug(ownershipInfos.length, 'ownershipInfos found.');
-        const ownershipInfosStr = '';
+        const ownershipInfosStr = 'implementing...';
         // const ownershipInfosStr = ownershipInfos.map((i) => {
         //     switch (i.typeOfGood.typeOf) {
         //         case cinerinoapi.factory.reservationType.EventReservation:
@@ -235,7 +224,7 @@ function pushTransactionDetails(user, orderNumber) {
         //     'data.transactionId': transaction.id
         // }).exec().then((docs) => docs.map((doc) => <cinerinoapi.factory.task.ITask<cinerinoapi.factory.taskName>>doc.toObject()));
         // タスクの実行日時を調べる
-        const taskStrs = '';
+        const taskStrs = 'implementing...';
         // const taskStrs = tasks.map((task) => {
         //     let taskNameStr = '???';
         //     switch (task.name) {
@@ -286,7 +275,6 @@ function pushTransactionDetails(user, orderNumber) {
             orderNumber: order.orderNumber,
             sort: { startDate: cinerinoapi.factory.sortType.Ascending }
         });
-        debug('actions:', actions);
         debug('actions on order found.', actions);
         // アクション履歴
         const actionStrs = actions
@@ -301,7 +289,7 @@ function pushTransactionDetails(user, orderNumber) {
                     actionName = '返金';
                     break;
                 case cinerinoapi.factory.actionType.OrderAction:
-                    actionName = '注文受付';
+                    actionName = '注文';
                     break;
                 case cinerinoapi.factory.actionType.SendAction:
                     if (action.object.typeOf === 'Order') {
@@ -315,7 +303,7 @@ function pushTransactionDetails(user, orderNumber) {
                     }
                     break;
                 case cinerinoapi.factory.actionType.PayAction:
-                    actionName = `支払(${action.object[0].paymentMethod.typeOf})`;
+                    actionName = `決済(${action.object[0].paymentMethod.typeOf})`;
                     break;
                 case cinerinoapi.factory.actionType.UseAction:
                     actionName = `${action.object.typeOf}使用`;
@@ -343,27 +331,16 @@ function pushTransactionDetails(user, orderNumber) {
             if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
                 if (acceptedOffer.itemOffered.reservationFor !== undefined) {
                     numItems = (acceptedOffer.itemOffered.numSeats !== undefined) ? acceptedOffer.itemOffered.numSeats : 1;
-                    name = util.format('%s\n%s-%s\n@%s %s', acceptedOffer.itemOffered.reservationFor.name.ja, moment(acceptedOffer.itemOffered.reservationFor.startDate).format('YY-MM-DD hh:mm'), moment(acceptedOffer.itemOffered.reservationFor.endDate).format('hh:mm'), acceptedOffer.itemOffered.reservationFor.superEvent.location.name.ja, acceptedOffer.itemOffered.reservationFor.location.name.ja);
+                    name = util.format('%s\n%s-%s\n@%s %s %s', acceptedOffer.itemOffered.reservationFor.name.ja, moment(acceptedOffer.itemOffered.reservationFor.startDate).format('YY-MM-DD hh:mm'), moment(acceptedOffer.itemOffered.reservationFor.endDate).format('hh:mm'), acceptedOffer.itemOffered.reservationFor.superEvent.location.name.ja, acceptedOffer.itemOffered.reservationFor.location.name.ja, (acceptedOffer.itemOffered.reservedTicket.ticketedSeat !== undefined)
+                        ? acceptedOffer.itemOffered.reservedTicket.ticketedSeat.seatNumber
+                        : '');
                 }
             }
             else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
-                name = acceptedOffer.itemOffered.programName;
+                name = util.format('%s %s %s per @%s', acceptedOffer.itemOffered.programName, acceptedOffer.price, acceptedOffer.priceCurrency, (acceptedOffer.eligibleDuration !== undefined)
+                    ? moment.duration(acceptedOffer.eligibleDuration.value, 'seconds').humanize()
+                    : '');
             }
-            //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
-            // <%= (acceptedOffer.itemOffered.reservedTicket !== undefined) ? acceptedOffer.itemOffered.reservedTicket.ticketToken : '' %>
-            //  }
-            //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
-            // <% if (acceptedOffer.itemOffered.reservedTicket!==undefined) { %>
-            // <%= acceptedOffer.itemOffered.reservedTicket.ticketedSeat.seatNumber %>
-            // <% } %>
-            //  } else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
-            // <%= acceptedOffer.price %>
-            // <%= acceptedOffer.priceCurrency %>
-            // per
-            // <%= moment.duration(acceptedOffer.eligibleDuration.value, 'seconds').humanize() %>
-            //  }
-            //  acceptedOffer.price;
-            // acceptedOffer.priceCurrency;
             return {
                 typeOf: acceptedOffer.itemOffered.typeOf,
                 name,
@@ -379,6 +356,7 @@ function pushTransactionDetails(user, orderNumber) {
 ${order.orderNumber}
 ${order.confirmationNumber}
 ${order.orderStatus}
+${process.env.CINERINO_CONSOLE_ENDPOINT}/orders/${order.orderNumber}
 ----------------------------
 注文処理履歴
 ----------------------------
@@ -389,30 +367,31 @@ ${actionStrs}
 ${ownershipInfosStr}
 `,
             `----------------------------
-販売者情報 - ${order.orderNumber}
+販売者 - ${order.orderNumber}
 ----------------------------
 ${transaction.seller.typeOf}
 ${transaction.seller.id}
-${transaction.seller.identifier}
 ${transaction.seller.name.ja}
 ${transaction.seller.url}
 ----------------------------
-購入者情報
+購入者
 ----------------------------
+${order.customer.typeOf}
+${order.customer.id}
 ${order.customer.name}
 ${order.customer.telephone}
 ${order.customer.email}
 ${(order.customer.memberOf !== undefined) ? `${order.customer.memberOf.membershipNumber}` : '非会員'}
 ----------------------------
-座席予約
+注文アイテム
 ----------------------------
-${orderItems.map((i) => `${i.typeOf} ${i.name} x${i.numItems}\n${i.price} ${i.priceCurrency}`)}
+${orderItems.map((i) => `${i.typeOf}\n${i.name} x${i.numItems}\n${i.price} ${i.priceCurrency}`)}
 ----------------------------
 決済方法
 ----------------------------
-${order.paymentMethods[0].typeOf}
-${order.paymentMethods[0].paymentMethodId}
-${order.price}
+${order.paymentMethods.map((p) => `${p.typeOf} ${p.paymentMethodId}`)}
+
+Total: ${order.price} ${order.priceCurrency}
 ----------------------------
 割引
 ----------------------------

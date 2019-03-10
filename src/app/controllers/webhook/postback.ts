@@ -159,17 +159,6 @@ export async function searchTransactionByConditions(params: {
                 ? params.conditions.telephone
                 : undefined
         }
-        // acceptedOffers: {
-        //     itemOffered: {
-        //         reservationFor: {
-        //             superEvent: {
-        //                 location: {
-        //                     branchCodes: [theaterCode.toString()]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     });
     const order = searchOrdersResult.data.shift();
     if (order === undefined) {
@@ -233,7 +222,7 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
     // ));
     debug(ownershipInfos.length, 'ownershipInfos found.');
 
-    const ownershipInfosStr = '';
+    const ownershipInfosStr = 'implementing...';
     // const ownershipInfosStr = ownershipInfos.map((i) => {
     //     switch (i.typeOfGood.typeOf) {
     //         case cinerinoapi.factory.reservationType.EventReservation:
@@ -273,7 +262,7 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
     // }).exec().then((docs) => docs.map((doc) => <cinerinoapi.factory.task.ITask<cinerinoapi.factory.taskName>>doc.toObject()));
 
     // タスクの実行日時を調べる
-    const taskStrs = '';
+    const taskStrs = 'implementing...';
     // const taskStrs = tasks.map((task) => {
     //     let taskNameStr = '???';
     //     switch (task.name) {
@@ -328,7 +317,6 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
         orderNumber: order.orderNumber,
         sort: { startDate: cinerinoapi.factory.sortType.Ascending }
     });
-    debug('actions:', actions);
     debug('actions on order found.', actions);
 
     // アクション履歴
@@ -344,7 +332,7 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
                     actionName = '返金';
                     break;
                 case cinerinoapi.factory.actionType.OrderAction:
-                    actionName = '注文受付';
+                    actionName = '注文';
                     break;
                 case cinerinoapi.factory.actionType.SendAction:
                     if (action.object.typeOf === 'Order') {
@@ -356,7 +344,7 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
                     }
                     break;
                 case cinerinoapi.factory.actionType.PayAction:
-                    actionName = `支払(${action.object[0].paymentMethod.typeOf})`;
+                    actionName = `決済(${action.object[0].paymentMethod.typeOf})`;
                     break;
                 case cinerinoapi.factory.actionType.UseAction:
                     actionName = `${action.object.typeOf}使用`;
@@ -395,35 +383,28 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
             if (acceptedOffer.itemOffered.reservationFor !== undefined) {
                 numItems = (acceptedOffer.itemOffered.numSeats !== undefined) ? acceptedOffer.itemOffered.numSeats : 1;
                 name = util.format(
-                    '%s\n%s-%s\n@%s %s',
+                    '%s\n%s-%s\n@%s %s %s',
                     acceptedOffer.itemOffered.reservationFor.name.ja,
                     moment(acceptedOffer.itemOffered.reservationFor.startDate).format('YY-MM-DD hh:mm'),
                     moment(acceptedOffer.itemOffered.reservationFor.endDate).format('hh:mm'),
                     acceptedOffer.itemOffered.reservationFor.superEvent.location.name.ja,
-                    acceptedOffer.itemOffered.reservationFor.location.name.ja
+                    acceptedOffer.itemOffered.reservationFor.location.name.ja,
+                    (acceptedOffer.itemOffered.reservedTicket.ticketedSeat !== undefined)
+                        ? acceptedOffer.itemOffered.reservedTicket.ticketedSeat.seatNumber
+                        : ''
                 );
             }
         } else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
-            name = acceptedOffer.itemOffered.programName;
+            name = util.format(
+                '%s %s %s per @%s',
+                acceptedOffer.itemOffered.programName,
+                acceptedOffer.price,
+                acceptedOffer.priceCurrency,
+                (acceptedOffer.eligibleDuration !== undefined)
+                    ? moment.duration(acceptedOffer.eligibleDuration.value, 'seconds').humanize()
+                    : ''
+            );
         }
-
-        //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
-        // <%= (acceptedOffer.itemOffered.reservedTicket !== undefined) ? acceptedOffer.itemOffered.reservedTicket.ticketToken : '' %>
-        //  }
-
-        //  if (acceptedOffer.itemOffered.typeOf === 'EventReservation') {
-        // <% if (acceptedOffer.itemOffered.reservedTicket!==undefined) { %>
-        // <%= acceptedOffer.itemOffered.reservedTicket.ticketedSeat.seatNumber %>
-        // <% } %>
-        //  } else if (acceptedOffer.itemOffered.typeOf === 'ProgramMembership') {
-        // <%= acceptedOffer.price %>
-        // <%= acceptedOffer.priceCurrency %>
-        // per
-        // <%= moment.duration(acceptedOffer.eligibleDuration.value, 'seconds').humanize() %>
-        //  }
-
-        //  acceptedOffer.price;
-        // acceptedOffer.priceCurrency;
 
         return {
             typeOf: acceptedOffer.itemOffered.typeOf,
@@ -438,66 +419,68 @@ async function pushTransactionDetails(user: User, orderNumber: string) {
     const transactionDetails = [`----------------------------
 注文状態
 ----------------------------
-${ order.orderNumber}
-${ order.confirmationNumber}
-${ order.orderStatus}
+${order.orderNumber}
+${order.confirmationNumber}
+${order.orderStatus}
+${process.env.CINERINO_CONSOLE_ENDPOINT}/orders/${order.orderNumber}
 ----------------------------
 注文処理履歴
 ----------------------------
-${ actionStrs}
+${actionStrs}
 ----------------------------
 注文アイテム状態
 ----------------------------
-${ ownershipInfosStr}
+${ownershipInfosStr}
 `,
     `----------------------------
-販売者情報 - ${ order.orderNumber}
+販売者 - ${order.orderNumber}
 ----------------------------
-${ transaction.seller.typeOf}
-${ transaction.seller.id}
-${ transaction.seller.identifier}
-${ transaction.seller.name.ja}
-${ transaction.seller.url}
+${transaction.seller.typeOf}
+${transaction.seller.id}
+${transaction.seller.name.ja}
+${transaction.seller.url}
 ----------------------------
-購入者情報
+購入者
 ----------------------------
-${ order.customer.name}
-${ order.customer.telephone}
-${ order.customer.email}
+${order.customer.typeOf}
+${order.customer.id}
+${order.customer.name}
+${order.customer.telephone}
+${order.customer.email}
 ${(order.customer.memberOf !== undefined) ? `${order.customer.memberOf.membershipNumber}` : '非会員'}
 ----------------------------
-座席予約
+注文アイテム
 ----------------------------
-${ orderItems.map((i) => `${i.typeOf} ${i.name} x${i.numItems}\n${i.price} ${i.priceCurrency}`)}
+${orderItems.map((i) => `${i.typeOf}\n${i.name} x${i.numItems}\n${i.price} ${i.priceCurrency}`)}
 ----------------------------
 決済方法
 ----------------------------
-${ order.paymentMethods[0].typeOf}
-${ order.paymentMethods[0].paymentMethodId}
-${ order.price}
+${order.paymentMethods.map((p) => `${p.typeOf} ${p.paymentMethodId}`)}
+
+Total: ${order.price} ${order.priceCurrency}
 ----------------------------
 割引
 ----------------------------
 `,
     `----------------------------
-注文取引 - ${ order.orderNumber}
+注文取引 - ${order.orderNumber}
 ----------------------------
-${ transaction.id}
-${ transaction.status}
+${transaction.id}
+${transaction.status}
 ----------------------------
 取引進行クライアント
 ----------------------------
-${ (transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
-${ (transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
 取引状況
 ----------------------------
-${ moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
-${ moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 成立
+${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 成立
 ----------------------------
 取引処理履歴
 ----------------------------
-${ taskStrs}
+${taskStrs}
 `]
         ;
 
