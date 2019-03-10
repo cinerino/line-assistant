@@ -78,9 +78,9 @@ export async function askTransactionInquiryKey(user: User) {
 }
 
 /**
- * 予約番号or電話番号のボタンを送信する
+ * 注文取引検索のキーを選択する
  */
-export async function pushButtonsReserveNumOrTel(userId: string, message: string) {
+export async function selectSearchTransactionsKey(userId: string, message: string) {
     debug(userId, message);
     const datas = message.split('-');
 
@@ -110,7 +110,10 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                             {
                                 type: 'postback',
                                 label: '取引ID',
-                                data: `action=searchTransactionById&transaction=${message}`
+                                data: querystring.stringify({
+                                    action: 'searchTransactionById',
+                                    transaction: message
+                                })
                             },
                             {
                                 type: 'postback',
@@ -123,7 +126,10 @@ export async function pushButtonsReserveNumOrTel(userId: string, message: string
                             {
                                 type: 'postback',
                                 label: '電話番号',
-                                data: `action=searchTransactionByConditions&telephone=${searchingText}`
+                                data: querystring.stringify({
+                                    action: 'searchTransactionByConditions',
+                                    telephone: searchingText
+                                })
                             }
                         ]
                     }

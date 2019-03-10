@@ -38,9 +38,9 @@ function message(event, user) {
                         case /^取引照会$/.test(messageText):
                             yield MessageController.askTransactionInquiryKey(user);
                             break;
-                        // 予約番号 or 電話番号 or 取引IDで検索
-                        case /^\d{1,12}|\w{24}$/.test(messageText):
-                            yield MessageController.pushButtonsReserveNumOrTel(userId, messageText);
+                        // テキストで注文取引検索
+                        case /^\+\d{1,12}|\d{1,12}|\w{24}$/.test(messageText):
+                            yield MessageController.selectSearchTransactionsKey(userId, messageText);
                             break;
                         // [劇場コード]-[予約番号 or 電話番号] or 取引IDで検索
                         case /^\d{3}-\d{1,12}|\w{24}$/.test(messageText):
@@ -103,6 +103,7 @@ function postback(event, user) {
                         user: user,
                         conditions: {
                             telephone: data.telephone,
+                            id: data.id,
                             confirmationNumber: data.confirmationNumber,
                             sellerId: data.seller
                         }

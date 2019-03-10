@@ -86,9 +86,9 @@ function askTransactionInquiryKey(user) {
 }
 exports.askTransactionInquiryKey = askTransactionInquiryKey;
 /**
- * 予約番号or電話番号のボタンを送信する
+ * 注文取引検索のキーを選択する
  */
-function pushButtonsReserveNumOrTel(userId, message) {
+function selectSearchTransactionsKey(userId, message) {
     return __awaiter(this, void 0, void 0, function* () {
         debug(userId, message);
         const datas = message.split('-');
@@ -118,7 +118,10 @@ function pushButtonsReserveNumOrTel(userId, message) {
                                 {
                                     type: 'postback',
                                     label: '取引ID',
-                                    data: `action=searchTransactionById&transaction=${message}`
+                                    data: querystring.stringify({
+                                        action: 'searchTransactionById',
+                                        transaction: message
+                                    })
                                 },
                                 {
                                     type: 'postback',
@@ -131,7 +134,10 @@ function pushButtonsReserveNumOrTel(userId, message) {
                                 {
                                     type: 'postback',
                                     label: '電話番号',
-                                    data: `action=searchTransactionByConditions&telephone=${searchingText}`
+                                    data: querystring.stringify({
+                                        action: 'searchTransactionByConditions',
+                                        telephone: searchingText
+                                    })
                                 }
                             ]
                         }
@@ -141,7 +147,7 @@ function pushButtonsReserveNumOrTel(userId, message) {
         }).promise();
     });
 }
-exports.pushButtonsReserveNumOrTel = pushButtonsReserveNumOrTel;
+exports.selectSearchTransactionsKey = selectSearchTransactionsKey;
 /**
  * 日付選択を求める
  */

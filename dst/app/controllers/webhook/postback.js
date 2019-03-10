@@ -109,7 +109,8 @@ exports.selectSeller = selectSeller;
  */
 function searchTransactionByConditions(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (params.conditions.confirmationNumber === undefined
+        if (params.conditions.id === undefined
+            && params.conditions.confirmationNumber === undefined
             && params.conditions.telephone === undefined) {
             yield LINE.pushMessage(params.user.userId, '検索条件が足りません');
             return;
@@ -345,70 +346,70 @@ function pushTransactionDetails(user, orderNumber) {
         // }
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
-        注文状態
+注文状態
 ----------------------------
-        ${order.orderNumber}
+${order.orderNumber}
 ${order.confirmationNumber}
 ${order.orderStatus}
 ----------------------------
-        注文処理履歴
+注文処理履歴
 ----------------------------
-        ${actionStrs}
+${actionStrs}
 ----------------------------
-        注文アイテム状態
+注文アイテム状態
 ----------------------------
-        ${ownershipInfosStr}
-            `,
+${ownershipInfosStr}
+`,
             `----------------------------
-        販売者情報 - ${order.orderNumber}
+販売者情報 - ${order.orderNumber}
 ----------------------------
-        ${transaction.seller.typeOf}
+${transaction.seller.typeOf}
 ${transaction.seller.id}
 ${transaction.seller.identifier}
 ${transaction.seller.name.ja}
 ${transaction.seller.url}
 ----------------------------
-        購入者情報
+購入者情報
 ----------------------------
-        ${order.customer.name}
+${order.customer.name}
 ${order.customer.telephone}
 ${order.customer.email}
 ${(order.customer.memberOf !== undefined) ? `${order.customer.memberOf.membershipNumber}` : '非会員'}
 ----------------------------
-    座席予約
+座席予約
 ----------------------------
-    ${(event !== undefined) ? event.name.ja : ''}
+${(event !== undefined) ? event.name.ja : ''}
 ${(event !== undefined) ? `${moment(event.startDate).format('YYYY-MM-DD HH:mm')}-${moment(event.endDate).format('HH:mm')}` : ''}
 ${reservations.map((i) => `${i.typeOf} ${i.name} x${i.numItems} ￥${i.totalPrice}`)}
 ----------------------------
-    決済方法
+決済方法
 ----------------------------
-    ${order.paymentMethods[0].typeOf}
+${order.paymentMethods[0].typeOf}
 ${order.paymentMethods[0].paymentMethodId}
 ${order.price}
 ----------------------------
-    割引
+割引
 ----------------------------
-    `,
+`,
             `----------------------------
-    注文取引 - ${order.orderNumber}
+注文取引 - ${order.orderNumber}
 ----------------------------
-    ${transaction.id}
+${transaction.id}
 ${transaction.status}
 ----------------------------
-    取引進行クライアント
+取引進行クライアント
 ----------------------------
-    ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
 ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
-    取引状況
+取引状況
 ----------------------------
-    ${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
 ${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 成立
 ----------------------------
-    取引処理履歴
+取引処理履歴
 ----------------------------
-    ${taskStrs}
+${taskStrs}
 `];
         yield Promise.all(transactionDetails.map((text) => __awaiter(this, void 0, void 0, function* () {
             yield LINE.pushMessage(user.userId, text);
@@ -571,47 +572,47 @@ function pushExpiredTransactionDetails(user, transactionId) {
         const customerContact = transaction.object.customerContact;
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
-    注文取引概要
+注文取引概要
 ----------------------------
-    ${transaction.id}
+${transaction.id}
 ${transaction.status}
 ----------------------------
-    販売者情報
+販売者情報
 ----------------------------
-    ${transaction.seller.typeOf}
+${transaction.seller.typeOf}
 ${transaction.seller.id}
 ${transaction.seller.identifier}
 ${transaction.seller.name.ja}
 ${transaction.seller.url}
 ----------------------------
-    購入者情報
+購入者情報
 ----------------------------
-    ${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
+${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
 ${(customerContact !== undefined) ? customerContact.telephone : ''}
 ${(customerContact !== undefined) ? customerContact.email : ''}
 ${(transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
 `,
             `----------------------------
-    注文取引
+注文取引
 ${transaction.id}
 ----------------------------
-    取引進行クライアント
+取引進行クライアント
 ----------------------------
-    ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
+${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.client_id : ''}
 ${(transaction.object.clientUser !== undefined) ? transaction.object.clientUser.iss : ''}
 ----------------------------
-    取引状況
+取引状況
 ----------------------------
-    ${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
+${moment(transaction.startDate).format('YYYY-MM-DD HH:mm:ss')} 開始
 ${moment(transaction.endDate).format('YYYY-MM-DD HH:mm:ss')} 期限切れ
 ----------------------------
-    承認アクション履歴
+承認アクション履歴
 ----------------------------
-    ${actionStrs}
+${actionStrs}
 ----------------------------
-    取引処理履歴
+取引処理履歴
 ----------------------------
-    ${taskStrs}
+${taskStrs}
 `];
         yield Promise.all(transactionDetails.map((text) => __awaiter(this, void 0, void 0, function* () {
             yield LINE.pushMessage(user.userId, text);
