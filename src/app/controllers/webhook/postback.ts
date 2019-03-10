@@ -142,7 +142,7 @@ export async function searchTransactionByConditions(params: {
         return;
     }
 
-    await LINE.pushMessage(params.user.userId, `取引を検索しています...\n${JSON.stringify(params.conditions, null, '\t')}`);
+    await LINE.pushMessage(params.user.userId, `直近1週間で取引を検索しています...\n${JSON.stringify(params.conditions, null, '\t')}`);
 
     // 注文検索
     const orderService = new cinerinoapi.service.Order({
@@ -153,7 +153,7 @@ export async function searchTransactionByConditions(params: {
         limit: 1,
         sort: { orderDate: cinerinoapi.factory.sortType.Descending },
         orderDateFrom: moment()
-            .add(-1, 'months')
+            .add(-1, 'week')
             .toDate(),
         orderDateThrough: moment()
             .toDate(),

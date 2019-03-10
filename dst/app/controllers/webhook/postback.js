@@ -120,7 +120,7 @@ function searchTransactionByConditions(params) {
             yield selectSeller(params);
             return;
         }
-        yield LINE.pushMessage(params.user.userId, `取引を検索しています...\n${JSON.stringify(params.conditions, null, '\t')}`);
+        yield LINE.pushMessage(params.user.userId, `直近1週間で取引を検索しています...\n${JSON.stringify(params.conditions, null, '\t')}`);
         // 注文検索
         const orderService = new cinerinoapi.service.Order({
             endpoint: API_ENDPOINT,
@@ -130,7 +130,7 @@ function searchTransactionByConditions(params) {
             limit: 1,
             sort: { orderDate: cinerinoapi.factory.sortType.Descending },
             orderDateFrom: moment()
-                .add(-1, 'months')
+                .add(-1, 'week')
                 .toDate(),
             orderDateThrough: moment()
                 .toDate(),
