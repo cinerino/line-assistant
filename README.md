@@ -1,6 +1,6 @@
 # Cinerino LINE Assistant
 
-[![CircleCI](https://circleci.com/gh/motionpicture/sskts-line-assistant.svg?style=svg&circle-token=0c65818a49ef1322b853fbc7541c929a2800d0e9)](https://circleci.com/gh/motionpicture/sskts-line-assistant)
+[![CircleCI](https://circleci.com/gh/cinerino/line-assistant.svg?style=svg)](https://circleci.com/gh/cinerino/line-assistant)
 
 ## Table of contents
 
