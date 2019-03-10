@@ -74,5 +74,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "2.5.2"
+  "version": "3.0.0"
 }
