@@ -7,7 +7,7 @@ const startTime = process.hrtime();
 const createDebug = require("debug");
 const http = require("http");
 const app = require("./app/app");
-const debug = createDebug('sskts-line-assistant:server');
+const debug = createDebug('cinerino-line-assistant:server');
 /**
  * Get port from environment and store in Express.
  */

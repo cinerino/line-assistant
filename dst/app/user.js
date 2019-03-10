@@ -8,12 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ssktsapi = require("@motionpicture/sskts-api-nodejs-client");
+const cinerinoapi = require("@cinerino/api-nodejs-client");
 const AWS = require("aws-sdk");
 const createDebug = require("debug");
 const redis = require("ioredis");
 const jwt = require("jsonwebtoken");
-const debug = createDebug('sskts-line-assistant:user');
+const debug = createDebug('cinerino-line-assistant:user');
 // 以下環境変数をセットすること
 // AWS_ACCESS_KEY_ID
 // AWS_SECRET_ACCESS_KEY
@@ -51,8 +51,8 @@ class User {
         this.host = configurations.host;
         this.userId = configurations.userId;
         this.state = configurations.state;
-        this.rekognitionCollectionId = `sskts-line-assistant-${this.userId}`;
-        this.authClient = new ssktsapi.auth.OAuth2({
+        this.rekognitionCollectionId = `cinerino-line-assistant-${this.userId}`;
+        this.authClient = new cinerinoapi.auth.OAuth2({
             domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
             clientId: process.env.API_CLIENT_ID,
             clientSecret: process.env.API_CLIENT_SECRET,

@@ -1,10 +1,10 @@
-import * as ssktsapi from '@motionpicture/sskts-api-nodejs-client';
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as AWS from 'aws-sdk';
 import * as createDebug from 'debug';
 import * as redis from 'ioredis';
 import * as jwt from 'jsonwebtoken';
 
-const debug = createDebug('sskts-line-assistant:user');
+const debug = createDebug('cinerino-line-assistant:user');
 
 import * as LINE from '../line';
 
@@ -98,16 +98,16 @@ export default class User {
     public userId: string;
     public payload: IPayload;
     public accessToken: string;
-    public authClient: ssktsapi.auth.OAuth2;
+    public authClient: cinerinoapi.auth.OAuth2;
     public rekognitionCollectionId: string;
 
     constructor(configurations: IConfigurations) {
         this.host = configurations.host;
         this.userId = configurations.userId;
         this.state = configurations.state;
-        this.rekognitionCollectionId = `sskts-line-assistant-${this.userId}`;
+        this.rekognitionCollectionId = `cinerino-line-assistant-${this.userId}`;
 
-        this.authClient = new ssktsapi.auth.OAuth2({
+        this.authClient = new cinerinoapi.auth.OAuth2({
             domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
             clientId: <string>process.env.API_CLIENT_ID,
             clientSecret: <string>process.env.API_CLIENT_SECRET,

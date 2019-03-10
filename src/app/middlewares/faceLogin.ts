@@ -1,7 +1,7 @@
 /**
  * 顔ログインミドルウェア
  */
-import * as ssktsapi from '@motionpicture/sskts-api-nodejs-client';
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import { NextFunction, Request, Response } from 'express';
 import { OK } from 'http-status';
 import * as querystring from 'querystring';
@@ -118,6 +118,6 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
         next();
     } catch (error) {
-        next(new ssktsapi.factory.errors.Unauthorized(error.message));
+        next(new cinerinoapi.factory.errors.Unauthorized(error.message));
     }
 };

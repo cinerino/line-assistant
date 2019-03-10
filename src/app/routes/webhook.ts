@@ -11,7 +11,7 @@ import authentication from '../middlewares/authentication';
 import faceLogin from '../middlewares/faceLogin';
 
 const webhookRouter = express.Router();
-const debug = createDebug('sskts-line-assistant:router:webhook');
+const debug = createDebug('cinerino-line-assistant:router');
 
 webhookRouter.all(
     '/',

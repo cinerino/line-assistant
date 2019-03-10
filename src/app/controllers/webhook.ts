@@ -13,7 +13,7 @@ import * as MessageController from './webhook/message';
 import * as ImageMessageController from './webhook/message/image';
 import * as PostbackController from './webhook/postback';
 
-const debug = createDebug('sskts-line-assistant:controller:webhook');
+const debug = createDebug('cinerino-line-assistant:controller');
 
 /**
  * メッセージが送信されたことを示すEvent Objectです。
@@ -36,20 +36,19 @@ export async function message(event: LINE.IWebhookEvent, user: User) {
                         await MessageController.askTransactionInquiryKey(user);
                         break;
 
+                    // テキストで注文取引検索
+                    case /^\+\d{1,12}|\d{1,12}|\w{24}$/.test(messageText):
+                        await MessageController.selectSearchTransactionsKey(userId, messageText);
+                        break;
+
                     // [劇場コード]-[予約番号 or 電話番号] or 取引IDで検索
                     case /^\d{3}-\d{1,12}|\w{24}$/.test(messageText):
-                        await MessageController.pushButtonsReserveNumOrTel(userId, messageText);
+                        await MessageController.askTransactionInquiryKey(user);
                         break;
 
                     // 取引csv要求
                     case /^csv$/.test(messageText):
                         await MessageController.askFromWhenAndToWhen(userId);
-                        break;
-
-                    // 取引csv期間指定
-                    case /^\d{8}-\d{8}$/.test(messageText):
-                        // tslint:disable-next-line:no-magic-numbers
-                        await MessageController.publishURI4transactionsCSV(userId, messageText.substr(0, 8), messageText.substr(9, 8));
                         break;
 
                     // ログアウト
@@ -105,20 +104,20 @@ export async function postback(event: LINE.IWebhookEvent, user: User) {
 
     try {
         switch (data.action) {
-            case 'searchTransactionByReserveNum':
-                await PostbackController.searchTransactionByReserveNum(user, <string>data.reserveNum, <string>data.theater);
+            case 'searchTransactionByConditions':
+                await PostbackController.searchTransactionByConditions({
+                    user: user,
+                    conditions: {
+                        telephone: <string>data.telephone,
+                        id: <string>data.id,
+                        confirmationNumber: <string>data.confirmationNumber,
+                        sellerId: <string>data.seller
+                    }
+                });
                 break;
 
             case 'searchTransactionById':
                 await PostbackController.searchTransactionById(user, <string>data.transaction);
-                break;
-
-            case 'searchTransactionByTel':
-                await PostbackController.searchTransactionByTel(userId, <string>data.tel, <string>data.theater);
-                break;
-
-            case 'searchTransactionsByDate':
-                await PostbackController.searchTransactionsByDate(userId, <string>event.postback.params.date);
                 break;
 
             case 'startReturnOrder':

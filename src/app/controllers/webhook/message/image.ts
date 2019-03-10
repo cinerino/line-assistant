@@ -8,7 +8,7 @@
 import * as LINE from '../../../../line';
 import User from '../../../user';
 
-// const debug = createDebug('sskts-line-assistant:controller:webhook:message:image');
+// const debug = createDebug('cinerino-line-assistant:controller:webhook:message:image');
 
 export async function indexFace(user: User, messageId: string) {
     const content = await LINE.getContent(messageId);

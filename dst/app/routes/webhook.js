@@ -18,7 +18,7 @@ const WebhookController = require("../controllers/webhook");
 const authentication_1 = require("../middlewares/authentication");
 const faceLogin_1 = require("../middlewares/faceLogin");
 const webhookRouter = express.Router();
-const debug = createDebug('sskts-line-assistant:router:webhook');
+const debug = createDebug('cinerino-line-assistant:router');
 webhookRouter.all('/', faceLogin_1.default, authentication_1.default, (req, res) => __awaiter(this, void 0, void 0, function* () {
     debug('body:', JSON.stringify(req.body));
     try {

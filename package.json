@@ -10,23 +10,22 @@
   ],
   "config": {},
   "dependencies": {
+    "@cinerino/api-nodejs-client": "1.1.0-alpha.45",
     "@motionpicture/express-middleware": "^0.1.0",
-    "@motionpicture/sskts-api-nodejs-client": "^5.0.0",
-    "@motionpicture/sskts-domain": "^27.0.1",
-    "aws-sdk": "^2.395.0",
+    "aws-sdk": "^2.418.0",
     "body-parser": "^1.18.3",
     "debug": "^3.1.0",
     "express": "^4.16.3",
     "http-status": "^1.1.2",
     "ioredis": "^3.2.2",
-    "jsonwebtoken": "^8.2.2",
+    "jsonwebtoken": "^8.5.0",
     "jwk-to-pem": "^1.2.6",
     "moment": "^2.24.0",
     "otplib": "^7.1.0",
     "request": "^2.87.0",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.7"
   },
-  "description": "sskts-line-assistant",
+  "description": "cinerino-line-assistant",
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
     "@types/debug": "0.0.29",
@@ -34,7 +33,7 @@
     "@types/http-status": "^0.2.30",
     "@types/ioredis": "^3.2.19",
     "@types/jsonwebtoken": "^7.2.8",
-    "@types/mocha": "^5.2.5",
+    "@types/mocha": "^5.2.6",
     "@types/otplib": "^7.0.0",
     "@types/request": "^2.48.1",
     "@types/request-promise-native": "^1.0.15",
@@ -44,12 +43,12 @@
     "mocha": "^5.2.0",
     "nyc": "^12.0.2",
     "rimraf": "^2.6.3",
-    "snyk": "^1.123.0",
+    "snyk": "^1.136.1",
     "supertest": "^3.4.2",
     "ts-node": "^6.2.0",
-    "tslint": "^5.12.1",
+    "tslint": "^5.13.1",
     "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^3.2.4"
+    "typescript": "^3.3.3333"
   },
   "engines": {
     "node": ">=8.0.0",
@@ -57,7 +56,7 @@
   },
   "keywords": [],
   "license": "ISC",
-  "name": "sskts-line-assistant",
+  "name": "cinerino-line-assistant",
   "private": true,
   "repository": {},
   "scripts": {
@@ -75,5 +74,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "2.5.2"
+  "version": "3.0.0"
 }
