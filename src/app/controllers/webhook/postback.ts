@@ -152,10 +152,15 @@ export async function searchTransactionByConditions(params: {
     const searchOrdersResult = await orderService.search({
         limit: 1,
         sort: { orderDate: cinerinoapi.factory.sortType.Descending },
+        orderDateFrom: moment()
+            .add(-1, 'months')
+            .toDate(),
+        orderDateThrough: moment()
+            .toDate(),
+        seller: { ids: [params.conditions.sellerId] },
         confirmationNumbers: (params.conditions.confirmationNumber !== undefined && params.conditions.confirmationNumber !== '')
             ? [params.conditions.confirmationNumber.toString()]
             : undefined,
-        seller: { ids: [params.conditions.sellerId] },
         customer: {
             telephone: (params.conditions.telephone !== undefined && params.conditions.telephone !== '')
                 ? params.conditions.telephone
