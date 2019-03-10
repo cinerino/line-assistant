@@ -120,7 +120,7 @@ function searchTransactionByConditions(params) {
             yield selectSeller(params);
             return;
         }
-        yield LINE.pushMessage(params.user.userId, '取引を検索しています...');
+        yield LINE.pushMessage(params.user.userId, `取引を検索しています...${JSON.stringify(params.conditions)}`);
         // 注文検索
         const orderService = new cinerinoapi.service.Order({
             endpoint: API_ENDPOINT,

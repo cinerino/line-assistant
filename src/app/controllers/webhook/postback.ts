@@ -142,7 +142,7 @@ export async function searchTransactionByConditions(params: {
         return;
     }
 
-    await LINE.pushMessage(params.user.userId, '取引を検索しています...');
+    await LINE.pushMessage(params.user.userId, `取引を検索しています...${JSON.stringify(params.conditions)}`);
 
     // 注文検索
     const orderService = new cinerinoapi.service.Order({
