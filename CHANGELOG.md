@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - update @cinerino/api-nodejs-client
+- Redisコネクション処理調整
 
 ### Deprecated
 

@@ -1,0 +1,112 @@
+[
+    {
+        "name": "API_AUTHORIZE_SERVER_DOMAIN",
+        "value": "sskts-admin-test.auth.ap-northeast-1.amazoncognito.com",
+        "slotSetting": false
+    },
+    {
+        "name": "API_CLIENT_ID",
+        "value": "2bt8s4frtkrlb1b6bc4opck5lh",
+        "slotSetting": false
+    },
+    {
+        "name": "API_CLIENT_SECRET",
+        "value": "1n3e007e83h59lpdtele0pgrmnrraooodlclnjhsc89e1eofjl0q",
+        "slotSetting": false
+    },
+    {
+        "name": "API_CODE_VERIFIER",
+        "value": "secret",
+        "slotSetting": false
+    },
+    {
+        "name": "API_ENDPOINT",
+        "value": "https://sskts-api-test.azurewebsites.net",
+        "slotSetting": false
+    },
+    {
+        "name": "API_TOKEN_ISSUER",
+        "value": "https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_8ErUhKXfF",
+        "slotSetting": false
+    },
+    {
+        "name": "AWS_ACCESS_KEY_ID",
+        "value": "AKIAJRHZJN7S4YZ2RZ3Q",
+        "slotSetting": false
+    },
+    {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "value": "OcOC/5JTS8cP7c/Vm9l2diQOoVsbwoE4CnQ6C29o",
+        "slotSetting": false
+    },
+    {
+        "name": "AZURE_STORAGE_CONNECTION_STRING",
+        "value": "DefaultEndpointsProtocol=https;AccountName=ssktstest;AccountKey=r1ONaUR8nA2DF8xZJsFVmS8VjJbfeBnDG1EKsaECmivs9rcFb7kwBBWObE2ZMOIfGv1uuSYtfwObat1bsQ90Dw==;EndpointSuffix=core.windows.net",
+        "slotSetting": false
+    },
+    {
+        "name": "COA_ENDPOINT",
+        "value": "http://coacinema.aa0.netvolante.jp",
+        "slotSetting": false
+    },
+    {
+        "name": "COA_REFRESH_TOKEN",
+        "value": "eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVkX2F0IjoxNDc5MjYwODQ4LCJhdXRoX2lkIjoiMzMxNSJ9.jx-w7D3YLP7UbY4mzJYC9xr368FiKWcpR2_L9mZfehQ",
+        "slotSetting": false
+    },
+    {
+        "name": "FACE_MATCH_THRESHOLD",
+        "value": "70",
+        "slotSetting": false
+    },
+    {
+        "name": "GMO_ENDPOINT",
+        "value": "https://pt01.mul-pay.jp",
+        "slotSetting": false
+    },
+    {
+        "name": "LINE_BOT_CHANNEL_ACCESS_TOKEN",
+        "value": "2HERaVj3rI5Bp8ZtqtXzuxGDOLphMWNsZw8b3uRFpJg0qmfqnc/u0Oi2RZa0+lhYhLJHg7EU8fc+owqKLWX2g95EQejsykwImLu1ad+dSmNy3wk+DQopep3bXXSPqCwmJtbnx67bWRA61QhzWPQfIgdB04t89/1O/w1cDnyilFU=",
+        "slotSetting": false
+    },
+    {
+        "name": "LINE_BOT_CHANNEL_SECRET",
+        "value": "449a3e3c437b6816d0c642ba73fed3f9",
+        "slotSetting": false
+    },
+    {
+        "name": "NODE_ENV",
+        "value": "test",
+        "slotSetting": false
+    },
+    {
+        "name": "REDIS_HOST",
+        "value": "sskts-test.redis.cache.windows.net",
+        "slotSetting": false
+    },
+    {
+        "name": "REDIS_KEY",
+        "value": "unPlT0u4AQWT0f0vX0LcyXk1HNFdHmwxiqHsqZUwZNs=",
+        "slotSetting": false
+    },
+    {
+        "name": "REDIS_PORT",
+        "value": "6380",
+        "slotSetting": false
+    },
+    {
+        "name": "REFRESH_TOKEN_EXPIRES_IN_SECONDS",
+        "value": "2678400",
+        "slotSetting": false
+    },
+    {
+        "name": "SENDGRID_API_KEY",
+        "value": "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",
+        "slotSetting": false
+    },
+    {
+        "name": "USER_EXPIRES_IN_SECONDS",
+        "value": "1800",
+        "slotSetting": false
+    }
+]

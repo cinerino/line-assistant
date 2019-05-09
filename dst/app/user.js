@@ -23,10 +23,9 @@ const rekognition = new AWS.Rekognition({
 });
 const redisClient = new redis({
     host: process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(process.env.REDIS_PORT, 10),
+    port: Number(process.env.REDIS_PORT),
     password: process.env.REDIS_KEY,
-    tls: { servername: process.env.REDIS_HOST }
+    tls: (process.env.REDIS_TLS_SERVERNAME !== undefined) ? { servername: process.env.REDIS_TLS_SERVERNAME } : undefined
 });
 const USER_EXPIRES_IN_SECONDS = process.env.USER_EXPIRES_IN_SECONDS;
 if (USER_EXPIRES_IN_SECONDS === undefined) {
