@@ -673,7 +673,13 @@ async function pushExpiredTransactionDetails(user: User, transactionId: string) 
             );
         }).join('\n');
 
-    const customerContact = transaction.object.customerContact;
+    const profile = {
+        memberOf: transaction.agent.memberOf,
+        email: transaction.agent.email,
+        familyName: transaction.agent.familyName,
+        givenName: transaction.agent.givenName,
+        telephone: transaction.agent.telephone
+    };
 
     // tslint:disable:max-line-length
     const transactionDetails = [`----------------------------
@@ -692,9 +698,9 @@ ${transaction.seller.url}
 ----------------------------
 購入者情報
 ----------------------------
-${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
-${(customerContact !== undefined) ? customerContact.telephone : ''}
-${(customerContact !== undefined) ? customerContact.email : ''}
+${profile.familyName} ${profile.givenName}
+${profile.telephone}
+${profile.email}
 ${(transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
 `,
     `----------------------------

@@ -582,7 +582,13 @@ function pushExpiredTransactionDetails(user, transactionId) {
             }
             return util.format('%s\n%s %s\n%s %s', moment(action.endDate).format('YYYY-MM-DD HH:mm:ss'), statusStr, actionName, statusStr, description);
         }).join('\n');
-        const customerContact = transaction.object.customerContact;
+        const profile = {
+            memberOf: transaction.agent.memberOf,
+            email: transaction.agent.email,
+            familyName: transaction.agent.familyName,
+            givenName: transaction.agent.givenName,
+            telephone: transaction.agent.telephone
+        };
         // tslint:disable:max-line-length
         const transactionDetails = [`----------------------------
 注文取引概要
@@ -600,9 +606,9 @@ ${transaction.seller.url}
 ----------------------------
 購入者情報
 ----------------------------
-${(customerContact !== undefined) ? `${customerContact.familyName} ${customerContact.givenName}` : ''}
-${(customerContact !== undefined) ? customerContact.telephone : ''}
-${(customerContact !== undefined) ? customerContact.email : ''}
+${profile.familyName} ${profile.givenName}
+${profile.telephone}
+${profile.email}
 ${(transaction.agent.memberOf !== undefined) ? `${transaction.agent.memberOf.membershipNumber}` : '非会員'}
 `,
             `----------------------------
